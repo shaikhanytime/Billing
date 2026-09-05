@@ -14,6 +14,12 @@ import {
   Settings,
   Home,
   ChevronRight,
+  Monitor,
+  Megaphone,
+  Gift,
+  Headphones,
+  Smartphone,
+  Calculator,
 } from 'lucide-react'
 
 function useBreadcrumbs() {
@@ -82,7 +88,7 @@ function TopNav({
   const currentCrumb = breadcrumbs[breadcrumbs.length - 1]
 
   return (
-    <header className="sticky top-0 z-30 flex h-[60px] items-center gap-3 border-b border-gray-800 bg-gray-900/95 backdrop-blur px-3 sm:px-4 lg:px-6">
+    <header className="sticky top-0 z-30 flex h-[58px] items-center gap-3 border-b border-gray-800 bg-[#0c1427]/95 backdrop-blur px-3 sm:px-4 lg:px-6">
       {/* Sidebar toggle */}
       <SidebarToggle
         collapsed={collapsed}
@@ -90,56 +96,81 @@ function TopNav({
         onMobileOpen={onMobileOpen}
       />
 
-      {/* Mobile Page Title */}
-      <div className="flex md:hidden items-center min-w-0">
-        <span className="text-sm font-semibold text-gray-200 truncate">
-          {currentCrumb ? currentCrumb.label : 'BizOps'}
-        </span>
+      {/* Main Title / Breadcrumbs */}
+      <div className="flex items-center min-w-0">
+        <h1 className="text-base sm:text-lg font-bold text-white tracking-tight">
+          {currentCrumb ? currentCrumb.label : 'Dashboard'}
+        </h1>
       </div>
 
-      {/* Desktop Breadcrumbs */}
-      <nav className="hidden md:flex items-center gap-1.5 text-sm text-gray-500 min-w-0">
-        <Link to="/dashboard" className="hover:text-gray-300 transition-colors shrink-0">
-          <Home className="h-3.5 w-3.5" />
-        </Link>
-        {breadcrumbs.map((crumb) => (
-          <span key={crumb.href} className="flex items-center gap-1.5 min-w-0">
-            <ChevronRight className="h-3 w-3 shrink-0" />
-            {crumb.isLast ? (
-              <span className="text-gray-300 font-medium truncate">{crumb.label}</span>
-            ) : (
-              <Link to={crumb.href} className="hover:text-gray-300 transition-colors truncate">
-                {crumb.label}
-              </Link>
-            )}
-          </span>
-        ))}
-      </nav>
-
+      {/* Right Top Action & Utility Icons */}
       <div className="ml-auto flex items-center gap-1 sm:gap-2">
+        {/* Desktop / POS View */}
+        <button
+          title="POS / Desktop Mode"
+          className="hidden sm:flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-white/5 hover:text-gray-200 transition-colors"
+        >
+          <Monitor className="h-4 w-4" />
+        </button>
+
+        {/* Announcements */}
+        <button
+          title="Updates & Announcements"
+          className="hidden sm:flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-white/5 hover:text-gray-200 transition-colors"
+        >
+          <Megaphone className="h-4 w-4" />
+        </button>
+
+        {/* Rewards / Offers */}
+        <button
+          title="Rewards & Referrals"
+          className="hidden sm:flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-white/5 hover:text-gray-200 transition-colors"
+        >
+          <Gift className="h-4 w-4" />
+        </button>
+
+        {/* Help & Support */}
+        <button
+          title="Customer Support"
+          className="hidden sm:flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-white/5 hover:text-gray-200 transition-colors"
+        >
+          <Headphones className="h-4 w-4" />
+        </button>
+
+        {/* Mobile App */}
+        <button
+          title="Get Mobile App"
+          className="hidden md:flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-white/5 hover:text-gray-200 transition-colors"
+        >
+          <Smartphone className="h-4 w-4" />
+        </button>
+
+        {/* Calculator */}
+        <button
+          title="Calculator & Tools"
+          className="hidden md:flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-white/5 hover:text-gray-200 transition-colors"
+        >
+          <Calculator className="h-4 w-4" />
+        </button>
+
         {/* Notifications */}
-        <button className="relative flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-white/5 hover:text-gray-200 transition-colors">
+        <button
+          title="Notifications"
+          className="relative flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-white/5 hover:text-gray-200 transition-colors"
+        >
           <Bell className="h-4 w-4" />
           <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-blue-500" />
         </button>
 
         {/* Profile menu */}
-        <div className="relative">
+        <div className="relative ml-1">
           <button
             onClick={() => setProfileOpen((o) => !o)}
-            className="flex items-center gap-2 rounded-lg p-1 sm:px-2.5 sm:py-1.5 hover:bg-white/5 transition-colors"
+            className="flex items-center gap-2 rounded-lg p-1 sm:px-2 sm:py-1 hover:bg-white/5 transition-colors"
             aria-label="User profile"
           >
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-xs font-semibold text-white shrink-0">
-              {user ? getInitials(user.firstName, user.lastName) : '?'}
-            </div>
-            <div className="hidden sm:block text-left">
-              <p className="text-xs font-medium text-gray-200 leading-tight">
-                {user?.firstName} {user?.lastName}
-              </p>
-              <p className="text-[10px] text-gray-500 leading-tight capitalize">
-                {user?.role?.toLowerCase().replace('_', ' ')}
-              </p>
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-400 text-slate-950 text-xs font-bold shrink-0">
+              {user ? getInitials(user.firstName, user.lastName) : 'B'}
             </div>
             <ChevronDown className="h-3.5 w-3.5 text-gray-500 hidden sm:block" />
           </button>
@@ -150,27 +181,35 @@ function TopNav({
                 className="fixed inset-0 z-10"
                 onClick={() => setProfileOpen(false)}
               />
-              <div className="absolute right-0 top-full mt-2 z-20 w-56 max-w-[calc(100vw-1.5rem)] rounded-xl border border-gray-700 bg-gray-800 shadow-2xl py-1">
-                <div className="px-4 py-3 border-b border-gray-700">
+              <div className="absolute right-0 top-full mt-2 z-20 w-56 max-w-[calc(100vw-1.5rem)] rounded-xl border border-gray-700 bg-gray-900 shadow-2xl py-1">
+                <div className="px-4 py-3 border-b border-gray-800">
                   <p className="text-sm font-semibold text-gray-200 truncate">
                     {user?.firstName} {user?.lastName}
                   </p>
                   <p className="text-xs text-gray-400 truncate">{user?.email}</p>
                 </div>
                 <div className="py-1">
-                  <button className="flex w-full items-center gap-3 px-4 py-2.5 sm:py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors">
+                  <Link
+                    to="/admin/users"
+                    onClick={() => setProfileOpen(false)}
+                    className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
+                  >
                     <User className="h-4 w-4 text-gray-400" />
                     Profile
-                  </button>
-                  <button className="flex w-full items-center gap-3 px-4 py-2.5 sm:py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors">
+                  </Link>
+                  <Link
+                    to="/admin/organization"
+                    onClick={() => setProfileOpen(false)}
+                    className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
+                  >
                     <Settings className="h-4 w-4 text-gray-400" />
                     Settings
-                  </button>
+                  </Link>
                 </div>
-                <div className="border-t border-gray-700 py-1">
+                <div className="border-t border-gray-800 py-1">
                   <button
                     onClick={handleLogout}
-                    className="flex w-full items-center gap-3 px-4 py-2.5 sm:py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                    className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
                   >
                     <LogOut className="h-4 w-4" />
                     Sign Out
