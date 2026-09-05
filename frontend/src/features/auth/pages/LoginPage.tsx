@@ -168,7 +168,7 @@ export function LoginPage() {
       </div>
 
       <p className="text-[11px] text-slate-400">
-        © 2026 BillingAnytime. Enterprise Platform.
+        © {new Date().getFullYear()} BillingAnytime. Enterprise Platform.
       </p>
     </div>
   )

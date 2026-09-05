@@ -42,7 +42,7 @@ export function AuthLayout() {
           </div>
         </div>
 
-        <p className="text-xs text-slate-400">© 2024 BillingAnytime. All rights reserved.</p>
+        <p className="text-xs text-slate-400">© {new Date().getFullYear()} BillingAnytime. All rights reserved.</p>
       </div>
 
       {/* Right panel — auth form */}
