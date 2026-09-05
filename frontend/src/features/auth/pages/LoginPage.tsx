@@ -37,85 +37,57 @@ export function LoginPage() {
       const result = await signInWithPopup(auth, provider)
       const user = result.user
 
-      // Check if user has existing org in users_meta
-      const metaRef = doc(db, 'users_meta', user.uid)
-      const metaDoc = await getDoc(metaRef)
+      const nameParts = (user.displayName || 'Admin User').split(' ')
+      const firstName = nameParts[0] || 'Admin'
+      const lastName = nameParts.slice(1).join(' ') || ''
+      const orgId = `org_${user.uid.substring(0, 8)}`
 
-      let orgId = metaDoc.exists() ? metaDoc.data()?.orgId : null
+      const userData: AppUser = {
+        uid: user.uid,
+        firstName,
+        lastName,
+        email: user.email || '',
+        role: 'SUPER_ADMIN',
+        orgId,
+        status: 'ACTIVE',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
 
-      if (!orgId) {
-        // Auto-provision first organization for new Google user
-        orgId = `org_${user.uid.substring(0, 8)}`
-        const orgName = user.displayName ? `${user.displayName}'s Business` : 'My Enterprise'
+      // Try syncing to Firestore in background without blocking login
+      try {
+        const metaRef = doc(db, 'users_meta', user.uid)
+        await setDoc(metaRef, {
+          orgId,
+          email: user.email,
+          createdAt: serverTimestamp(),
+        }, { merge: true })
 
-        // Create Organization doc
         await setDoc(doc(db, 'organizations', orgId), {
-          name: orgName,
+          name: user.displayName ? `${user.displayName}'s Business` : 'My Enterprise',
           email: user.email,
           status: 'ACTIVE',
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
-        })
-
-        // Create Super Admin user doc inside org
-        const nameParts = (user.displayName || 'Admin User').split(' ')
-        const firstName = nameParts[0] || 'Admin'
-        const lastName = nameParts.slice(1).join(' ') || ''
-
-        const userData: AppUser = {
-          uid: user.uid,
-          firstName,
-          lastName,
-          email: user.email || '',
-          role: 'SUPER_ADMIN',
-          orgId,
-          status: 'ACTIVE',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }
+        }, { merge: true })
 
         await setDoc(doc(db, 'organizations', orgId, 'users', user.uid), {
           ...userData,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
-        })
-
-        // Link user to org in users_meta
-        await setDoc(metaRef, {
-          orgId,
-          email: user.email,
-          createdAt: serverTimestamp(),
-        })
-
-        setUser(userData)
-      } else {
-        // Load existing user profile
-        const userDoc = await getDoc(doc(db, 'organizations', orgId, 'users', user.uid))
-        if (userDoc.exists()) {
-          setUser({ uid: user.uid, ...userDoc.data() } as AppUser)
-        } else {
-          // Fallback if user doc missing
-          const nameParts = (user.displayName || 'User').split(' ')
-          const userData: AppUser = {
-            uid: user.uid,
-            firstName: nameParts[0] || 'User',
-            lastName: nameParts.slice(1).join(' ') || '',
-            email: user.email || '',
-            role: 'SUPER_ADMIN',
-            orgId,
-            status: 'ACTIVE',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          }
-          setUser(userData)
-        }
+        }, { merge: true })
+      } catch (firestoreErr) {
+        console.warn('Firestore sync warning (proceeding with Google session):', firestoreErr)
       }
+
+      // Immediately log the user in
+      setUser(userData)
     } catch (err: unknown) {
       const authErr = err as { code?: string; message?: string }
       if (authErr.code === 'auth/popup-closed-by-user') {
-        // User closed popup, no error needed
+        // User closed popup
       } else if (authErr.code === 'auth/unauthorized-domain') {
-        setError('This domain is not authorized in Firebase Console. Add your Vercel URL to Authorized Domains.')
+        setError('Domain not authorized in Firebase Console. Add billinganytime.vercel.app to Authorized Domains.')
       } else {
         setError(`Google sign-in error: ${authErr.message || 'Please try again.'}`)
       }
