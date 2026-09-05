@@ -18,14 +18,14 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       orgId: null,
       isLoading: true,
-      setUser: (user) => set({ user, orgId: user?.orgId ?? null }),
+      setUser: (user) => set({ user, orgId: user?.orgId ?? null, isLoading: false }),
       setOrgId: (orgId) => set({ orgId }),
       setLoading: (isLoading) => set({ isLoading }),
       logout: () => set({ user: null, orgId: null, isLoading: false }),
     }),
     {
       name: 'bizops-auth',
-      partialize: (state) => ({ orgId: state.orgId }),
+      partialize: (state) => ({ user: state.user, orgId: state.orgId }),
     }
   )
 )

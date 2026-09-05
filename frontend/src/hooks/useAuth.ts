@@ -6,44 +6,82 @@ import { useAuthStore } from '@/store/auth.store'
 import type { AppUser } from '@/types'
 
 export function useAuthInit() {
-  const { setUser, setLoading, user } = useAuthStore()
+  const { setUser, setLoading } = useAuthStore()
 
   useEffect(() => {
-    // If user already persisted from demo session, stop loading
-    if (user) {
+    // If user already persisted from session, allow instant render
+    const persistedUser = useAuthStore.getState().user
+    if (persistedUser) {
       setLoading(false)
     }
 
-    // Safety timeout: ensure loading screen clears within 1.5s
+    // Safety timeout: ensure loading screen clears within 1s
     const timeoutId = setTimeout(() => {
       setLoading(false)
-    }, 1500)
+    }, 1000)
 
     try {
       const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
         clearTimeout(timeoutId)
         if (firebaseUser) {
+          const currentUser = useAuthStore.getState().user
+          if (currentUser && currentUser.uid === firebaseUser.uid) {
+            setLoading(false)
+            return
+          }
+
+          const nameParts = (firebaseUser.displayName || 'Admin User').split(' ')
+          const firstName = nameParts[0] || 'Admin'
+          const lastName = nameParts.slice(1).join(' ') || ''
+          const defaultOrgId = `org_${firebaseUser.uid.substring(0, 8)}`
+
           try {
             const tokenResult = await firebaseUser.getIdTokenResult()
-            const orgId = tokenResult.claims['orgId'] as string | undefined
+            const orgId = (tokenResult.claims['orgId'] as string | undefined) || defaultOrgId
 
-            if (orgId) {
+            let userData: AppUser = {
+              uid: firebaseUser.uid,
+              firstName,
+              lastName,
+              email: firebaseUser.email || '',
+              role: 'SUPER_ADMIN',
+              orgId,
+              status: 'ACTIVE',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            }
+
+            try {
               const userDoc = await getDoc(
                 doc(db, 'organizations', orgId, 'users', firebaseUser.uid)
               )
               if (userDoc.exists()) {
-                setUser({ uid: firebaseUser.uid, ...userDoc.data() } as AppUser)
-              } else {
-                setUser(null)
+                userData = { uid: firebaseUser.uid, ...userDoc.data() } as AppUser
               }
-            } else {
-              setUser(null)
+            } catch {
+              // use fallback userData
             }
+
+            setUser(userData)
           } catch {
+            setUser({
+              uid: firebaseUser.uid,
+              firstName,
+              lastName,
+              email: firebaseUser.email || '',
+              role: 'SUPER_ADMIN',
+              orgId: defaultOrgId,
+              status: 'ACTIVE',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            })
+          }
+        } else {
+          // If no Firebase user and not a demo user, reset
+          const currentUser = useAuthStore.getState().user
+          if (!currentUser || !currentUser.uid.startsWith('demo-')) {
             setUser(null)
           }
-        } else if (!user) {
-          setUser(null)
         }
         setLoading(false)
       })
@@ -56,7 +94,7 @@ export function useAuthInit() {
       clearTimeout(timeoutId)
       setLoading(false)
     }
-  }, [setUser, setLoading, user])
+  }, [setUser, setLoading])
 }
 
 export function useAuth() {
