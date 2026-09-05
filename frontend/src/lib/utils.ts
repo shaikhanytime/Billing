@@ -18,6 +18,14 @@ export function formatPaise(paise: number = 0): string {
   return formatCurrency(paise / 100)
 }
 
+export function toPaise(rupees: number = 0): number {
+  return Math.round(Number(rupees || 0) * 100)
+}
+
+export function toRupees(paise: number = 0): number {
+  return Number(paise || 0) / 100
+}
+
 export function formatDate(date: string | Date, fmt = 'dd MMM yyyy'): string {
   const d = typeof date === 'string' ? parseISO(date) : date
   return format(d, fmt)

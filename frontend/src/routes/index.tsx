@@ -53,6 +53,20 @@ const CreatePurchaseInvoicePage = lazy(() =>
   import('@/features/purchases/pages/CreatePurchaseInvoicePage').then((m) => ({ default: m.CreatePurchaseInvoicePage }))
 )
 
+// Payments
+const PaymentsReceivedPage = lazy(() =>
+  import('@/features/payments/pages/PaymentsReceivedPage').then((m) => ({ default: m.PaymentsReceivedPage }))
+)
+const CreatePaymentInPage = lazy(() =>
+  import('@/features/payments/pages/CreatePaymentInPage').then((m) => ({ default: m.CreatePaymentInPage }))
+)
+const PaymentsMadePage = lazy(() =>
+  import('@/features/payments/pages/PaymentsMadePage').then((m) => ({ default: m.PaymentsMadePage }))
+)
+const CreatePaymentOutPage = lazy(() =>
+  import('@/features/payments/pages/CreatePaymentOutPage').then((m) => ({ default: m.CreatePaymentOutPage }))
+)
+
 // Placeholder component for pages not yet implemented
 function ComingSoon({ name }: { name: string }) {
   return (
@@ -140,10 +154,22 @@ const router = createBrowserRouter([
           { path: 'purchases/returns', element: <ComingSoon name="Purchase Returns" /> },
 
           // ─── Payments ─────────────────────────────────────────────────────
-          { path: 'payments/received', element: <ComingSoon name="Payments Received" /> },
-          { path: 'payments/received/new', element: <ComingSoon name="Receive Payment" /> },
-          { path: 'payments/made', element: <ComingSoon name="Payments Made" /> },
-          { path: 'payments/made/new', element: <ComingSoon name="Make Payment" /> },
+          {
+            path: 'payments/received',
+            element: <Suspense fallback={PageLoader}><PaymentsReceivedPage /></Suspense>,
+          },
+          {
+            path: 'payments/received/new',
+            element: <Suspense fallback={PageLoader}><CreatePaymentInPage /></Suspense>,
+          },
+          {
+            path: 'payments/made',
+            element: <Suspense fallback={PageLoader}><PaymentsMadePage /></Suspense>,
+          },
+          {
+            path: 'payments/made/new',
+            element: <Suspense fallback={PageLoader}><CreatePaymentOutPage /></Suspense>,
+          },
 
           // ─── Parties ──────────────────────────────────────────────────────
           {

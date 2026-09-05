@@ -187,18 +187,30 @@ export interface UnitConversionRule {
 
 ### Module C: Standalone Payments & Multi-Invoice Allocation (`/payments/`)
 
-#### 1. FIFO & Manual Settlement Resolver
-When a customer pays ₹10,000 against 3 pending invoices (Inv #1: ₹4,000, Inv #2: ₹5,000, Inv #3: ₹3,000):
-- **FIFO Auto-Allocation**:
-  - Inv #1: ₹4,000 (Status: `PAID`, Balance: ₹0)
-  - Inv #2: ₹5,000 (Status: `PAID`, Balance: ₹0)
-  - Inv #3: ₹1,000 (Status: `PARTIAL`, Balance: ₹2,000)
-  - Unallocated Advance: ₹0
-- **Atomic Invoice Balance Synchronization**:
-  Inside the payment transaction, each allocated invoice document has its `paidAmountPaise` incremented and `balanceDuePaise` and `paymentStatus` updated atomically.
+#### 1. Economic Settlement & Authoritative Party Ledger Resolver
+All financial math is performed in integer **Paise**:
+$$\text{settlementAmountPaise} = \text{paymentAmountPaise} + \text{discountPaise}$$
+$$\text{settlementAllocatedPaise}_i = \text{paymentAllocatedPaise}_i + \text{discountAllocatedPaise}_i$$
+$$\text{unallocatedPaymentAmountPaise} = \text{paymentAmountPaise} - \sum \text{paymentAllocatedPaise}_i$$
+
+* **The Three Strict Universal Invariants**:
+  1. $\mathbf{\text{totalAmountPaise} \equiv \text{paidAmountPaise} + \text{balanceDuePaise}}$
+  2. $\mathbf{\text{paymentAmountPaise} \equiv \text{allocatedPhysicalPaymentPaise} + \text{availableAdvancePaise} + \text{activeAdvanceAllocationsPaise}}$
+  3. $\mathbf{\text{settlementAmountPaise} \equiv \sum \text{paymentAllocatedPaise} + \text{unallocatedPaymentAmountPaise} + \sum \text{discountAllocatedPaise} \equiv \text{paymentAmountPaise} + \text{discountPaise}}$
+* **Party Ledger Posting & Non-Duplication Principle**:
+  - `PAYMENT_IN` posts a **single CREDIT of $\text{settlementAmountPaise}$** ($\text{payment} + \text{discount}$).
+  - For overpayments (e.g. ₹20,000 for ₹15,000 invoice $\rightarrow$ ₹5,000 advance), the original receipt is recognized **once** via the single ₹20,000 credit.
+  - Later `AdvanceAllocation` applying that ₹5,000 advance against an invoice creates **ZERO additional Party Ledger entries** (internal document linkage).
+* **Payment Voucher Reversal (`POSTED → REVERSED`)**:
+  Posts exact inverse Debit entry for full settlement amount, restores invoice `balanceDuePaise`, and updates status to `UNPAID`. If advance was consumed downstream, reversal is blocked with `ADVANCE_ALREADY_APPLIED` until downstream advance allocations are reversed.
 
 #### 2. API Contract
-- `POST /api/payments`: Records standalone Payment In / Out with optional explicit or auto-FIFO invoice allocations.
+- `POST /api/payments`: Records standalone Payment In / Out with explicit or unified settlement FIFO allocations.
+- `GET /api/payments`: Lists payment vouchers with filtering by type, party, mode, date.
+- `GET /api/payments/:id`: Retrieves single payment voucher with complete allocation breakdown.
+- `POST /api/payments/:id/reverse`: Reverses payment voucher atomically (with dependent advance check).
+- `POST /api/payments/apply-advance`: Applies available unconsumed advance to an open invoice (zero ledger duplication).
+- `POST /api/payments/advance-allocations/:id/reverse`: Reverses an individual advance allocation (restores available advance).
 - `GET /api/parties/:id/unpaid-invoices`: Fetches open/partially-paid invoices for interactive payment allocation checklist.
 
 ---

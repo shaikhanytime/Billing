@@ -265,26 +265,61 @@ export interface PaymentAllocation {
   paymentId: string;
   invoiceId: string;
   invoiceType: 'SALE_INVOICE' | 'PURCHASE_INVOICE';
-  allocatedAmount: number;       // In Paise
+  invoiceNumber?: string;
+  paymentAllocatedPaise: number;    // Physical funds allocated
+  discountAllocatedPaise: number;   // Settlement discount allocated
+  settlementAllocatedPaise: number; // Total liability extinguished (paymentAllocated + discountAllocated)
+  allocatedAmount?: number;         // Legacy alias for settlementAllocatedPaise
   allocatedAt: string;
 }
+
+export interface AdvanceAllocation {
+  id: string;
+  orgId: string;
+  sourcePaymentId: string;
+  sourcePaymentDocumentNumber: string;
+  invoiceId: string;
+  invoiceNumber: string;
+  invoiceType: 'SALE_INVOICE' | 'PURCHASE_INVOICE';
+  amountPaise: number;              // Physical advance amount applied
+  status: 'APPLIED' | 'REVERSED';
+  appliedAt: string;
+  reversedAt?: string;
+  reversedBy?: string;
+  reversalReason?: string;
+}
+
+export type PaymentVoucherStatus = 'POSTED' | 'REVERSED';
 
 export interface PaymentVoucher extends TransactionEnvelope {
   documentType: 'PAYMENT_IN' | 'PAYMENT_OUT';
   partyId: string;
   partyName: string;
   partyType: 'CUSTOMER' | 'SUPPLIER';
-  totalAmount: number;           // In Paise
-  discountAmount: number;        // Cash discount allowed/received in Paise
+  paymentAmountPaise: number;             // Physical amount in Paise
+  discountPaise: number;                  // Settlement discount in Paise
+  settlementAmountPaise: number;          // Total settled (payment + discount)
+  unallocatedPaymentAmountPaise: number;  // Physical advance remaining in Paise
+  totalAmount?: number;                   // Legacy alias
+  discountAmount?: number;                // Legacy alias
+  unallocatedAmount?: number;             // Legacy alias
   paymentMode: 'CASH' | 'BANK_TRANSFER' | 'UPI' | 'CHEQUE';
   bankAccountId?: string;
   referenceNumber?: string;
-  unallocatedAmount: number;     // Advance remaining (Paise)
   allocations: {
+    allocationId?: string;
     invoiceId: string;
     invoiceNumber: string;
-    allocatedAmount: number;     // In Paise
+    invoiceType?: 'SALE_INVOICE' | 'PURCHASE_INVOICE';
+    paymentAllocatedPaise: number;
+    discountAllocatedPaise: number;
+    settlementAllocatedPaise: number;
+    allocatedAmount?: number;             // Legacy alias
   }[];
+  status: TransactionStatus;
+  reversalReason?: string;
+  reversedAt?: string;
+  reversedBy?: string;
   notes?: string;
 }
 
