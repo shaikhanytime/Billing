@@ -1,0 +1,202 @@
+import { useState } from 'react'
+import { Outlet, useLocation, Link } from 'react-router-dom'
+import { signOut } from 'firebase/auth'
+import { auth } from '@/firebase/config'
+import { useAuth } from '@/hooks/useAuth'
+import { useAuthStore } from '@/store/auth.store'
+import { Sidebar, SidebarToggle } from './Sidebar'
+import { cn, getInitials } from '@/lib/utils'
+import {
+  Bell,
+  ChevronDown,
+  LogOut,
+  User,
+  Settings,
+  Home,
+  ChevronRight,
+} from 'lucide-react'
+
+function useBreadcrumbs() {
+  const location = useLocation()
+  const segments = location.pathname.split('/').filter(Boolean)
+
+  const labels: Record<string, string> = {
+    dashboard: 'Dashboard',
+    inventory: 'Inventory',
+    products: 'Products',
+    categories: 'Categories',
+    units: 'Units',
+    stock: 'Stock',
+    adjustments: 'Adjustments',
+    sales: 'Sales',
+    invoices: 'Invoices',
+    quotations: 'Quotations',
+    returns: 'Returns',
+    purchases: 'Purchases',
+    payments: 'Payments',
+    received: 'Received',
+    made: 'Made',
+    parties: 'Parties',
+    customers: 'Customers',
+    suppliers: 'Suppliers',
+    ledger: 'Ledger',
+    party: 'Party Ledger',
+    outstanding: 'Outstanding',
+    reports: 'Reports',
+    gst: 'GST Summary',
+    admin: 'Administration',
+    users: 'Users',
+    organization: 'Organization',
+    branches: 'Branches',
+    warehouses: 'Warehouses',
+    new: 'New',
+    edit: 'Edit',
+  }
+
+  return segments.map((seg, i) => ({
+    label: labels[seg] ?? seg.charAt(0).toUpperCase() + seg.slice(1),
+    href: '/' + segments.slice(0, i + 1).join('/'),
+    isLast: i === segments.length - 1,
+  }))
+}
+
+function TopNav({
+  collapsed,
+  onToggle,
+  onMobileOpen,
+}: {
+  collapsed: boolean
+  onToggle: () => void
+  onMobileOpen: () => void
+}) {
+  const { user } = useAuth()
+  const { logout } = useAuthStore()
+  const breadcrumbs = useBreadcrumbs()
+  const [profileOpen, setProfileOpen] = useState(false)
+
+  async function handleLogout() {
+    await signOut(auth)
+    logout()
+  }
+
+  return (
+    <header className="sticky top-0 z-30 flex h-[60px] items-center gap-4 border-b border-gray-800 bg-gray-900/95 backdrop-blur px-4 lg:px-6">
+      {/* Sidebar toggle */}
+      <SidebarToggle
+        collapsed={collapsed}
+        onToggle={onToggle}
+        onMobileOpen={onMobileOpen}
+      />
+
+      {/* Breadcrumbs */}
+      <nav className="hidden md:flex items-center gap-1.5 text-sm text-gray-500">
+        <Link to="/dashboard" className="hover:text-gray-300 transition-colors">
+          <Home className="h-3.5 w-3.5" />
+        </Link>
+        {breadcrumbs.map((crumb) => (
+          <span key={crumb.href} className="flex items-center gap-1.5">
+            <ChevronRight className="h-3 w-3" />
+            {crumb.isLast ? (
+              <span className="text-gray-300 font-medium">{crumb.label}</span>
+            ) : (
+              <Link to={crumb.href} className="hover:text-gray-300 transition-colors">
+                {crumb.label}
+              </Link>
+            )}
+          </span>
+        ))}
+      </nav>
+
+      <div className="ml-auto flex items-center gap-2">
+        {/* Notifications */}
+        <button className="relative flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-white/5 hover:text-gray-200 transition-colors">
+          <Bell className="h-4 w-4" />
+          <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-blue-500" />
+        </button>
+
+        {/* Profile menu */}
+        <div className="relative">
+          <button
+            onClick={() => setProfileOpen((o) => !o)}
+            className="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 hover:bg-white/5 transition-colors"
+          >
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-xs font-semibold text-white">
+              {user ? getInitials(user.firstName, user.lastName) : '?'}
+            </div>
+            <div className="hidden sm:block text-left">
+              <p className="text-xs font-medium text-gray-200 leading-tight">
+                {user?.firstName} {user?.lastName}
+              </p>
+              <p className="text-[10px] text-gray-500 leading-tight capitalize">
+                {user?.role?.toLowerCase().replace('_', ' ')}
+              </p>
+            </div>
+            <ChevronDown className="h-3.5 w-3.5 text-gray-500" />
+          </button>
+
+          {profileOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-10"
+                onClick={() => setProfileOpen(false)}
+              />
+              <div className="absolute right-0 top-full mt-2 z-20 w-52 rounded-xl border border-gray-700 bg-gray-800 shadow-2xl py-1">
+                <div className="px-4 py-3 border-b border-gray-700">
+                  <p className="text-sm font-semibold text-gray-200">
+                    {user?.firstName} {user?.lastName}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                </div>
+                <div className="py-1">
+                  <button className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-400 hover:bg-white/5 hover:text-gray-200 transition-colors">
+                    <User className="h-4 w-4" />
+                    Profile
+                  </button>
+                  <button className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-400 hover:bg-white/5 hover:text-gray-200 transition-colors">
+                    <Settings className="h-4 w-4" />
+                    Settings
+                  </button>
+                </div>
+                <div className="border-t border-gray-700 py-1">
+                  <button
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </header>
+  )
+}
+
+export function AppLayout() {
+  const [collapsed, setCollapsed] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+
+  return (
+    <div className="flex min-h-screen bg-gray-950">
+      <Sidebar
+        collapsed={collapsed}
+        onToggle={() => setCollapsed((c) => !c)}
+        mobileOpen={mobileOpen}
+        onMobileClose={() => setMobileOpen(false)}
+      />
+      <div className="flex flex-1 flex-col min-w-0">
+        <TopNav
+          collapsed={collapsed}
+          onToggle={() => setCollapsed((c) => !c)}
+          onMobileOpen={() => setMobileOpen(true)}
+        />
+        <main className={cn('flex-1 p-4 lg:p-6 page-enter')}>
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  )
+}

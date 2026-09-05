@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helper Functions ─────────────────────────────────────────────────────
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function orgId() {
+      return request.auth.token.orgId;
+    }
+
+    function isOrgMember(org) {
+      return isAuthenticated() && orgId() == org;
+    }
+
+    function hasRole(org, role) {
+      return isOrgMember(org) &&
+        get(/databases/$(database)/documents/organizations/$(org)/users/$(request.auth.uid)).data.role == role;
+    }
+
+    function isAdminOrAbove(org) {
+      return isOrgMember(org) &&
+        get(/databases/$(database)/documents/organizations/$(org)/users/$(request.auth.uid)).data.role in ['ADMIN', 'SUPER_ADMIN'];
+    }
+
+    // ─── Organizations ────────────────────────────────────────────────────────
+    match /organizations/{orgId} {
+      allow read: if isOrgMember(orgId);
+      allow write: if isAdminOrAbove(orgId);
+
+      // Users within org
+      match /users/{userId} {
+        allow read: if isOrgMember(orgId);
+        allow write: if isAdminOrAbove(orgId) || request.auth.uid == userId;
+      }
+
+      // Audit logs — read only for admins, no client writes
+      match /auditLogs/{logId} {
+        allow read: if isAdminOrAbove(orgId);
+        allow write: if false; // Only written by backend
+      }
+
+      // All other org collections — org members can read, admin+ can write
+      match /{collection}/{docId} {
+        allow read: if isOrgMember(orgId);
+        allow write: if isOrgMember(orgId);
+      }
+    }
+
+    // Users meta — only the owner can read their own
+    match /users_meta/{userId} {
+      allow read, write: if request.auth.uid == userId;
+    }
+
+    // Deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
