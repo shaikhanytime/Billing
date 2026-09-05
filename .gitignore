@@ -6,7 +6,8 @@ node_modules/
 # Build outputs
 dist/
 build/
-lib/
+/backend/lib/
+/backend/dist/
 *.tsbuildinfo
 
 # Environment files
@@ -26,5 +27,6 @@ firestore-debug.log
 # IDE & OS
 .DS_Store
 *.pem
+*.rtf
 .vscode/
 .idea/
