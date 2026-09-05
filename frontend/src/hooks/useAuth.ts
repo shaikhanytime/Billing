@@ -6,40 +6,57 @@ import { useAuthStore } from '@/store/auth.store'
 import type { AppUser } from '@/types'
 
 export function useAuthInit() {
-  const { setUser, setLoading } = useAuthStore()
+  const { setUser, setLoading, user } = useAuthStore()
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          // Get token claims to find orgId
-          const tokenResult = await firebaseUser.getIdTokenResult()
-          const orgId = tokenResult.claims['orgId'] as string | undefined
+    // If user already persisted from demo session, stop loading
+    if (user) {
+      setLoading(false)
+    }
 
-          if (orgId) {
-            const userDoc = await getDoc(
-              doc(db, 'organizations', orgId, 'users', firebaseUser.uid)
-            )
-            if (userDoc.exists()) {
-              setUser({ uid: firebaseUser.uid, ...userDoc.data() } as AppUser)
+    // Safety timeout: ensure loading screen clears within 1.5s
+    const timeoutId = setTimeout(() => {
+      setLoading(false)
+    }, 1500)
+
+    try {
+      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        clearTimeout(timeoutId)
+        if (firebaseUser) {
+          try {
+            const tokenResult = await firebaseUser.getIdTokenResult()
+            const orgId = tokenResult.claims['orgId'] as string | undefined
+
+            if (orgId) {
+              const userDoc = await getDoc(
+                doc(db, 'organizations', orgId, 'users', firebaseUser.uid)
+              )
+              if (userDoc.exists()) {
+                setUser({ uid: firebaseUser.uid, ...userDoc.data() } as AppUser)
+              } else {
+                setUser(null)
+              }
             } else {
               setUser(null)
             }
-          } else {
-            // New user — not yet assigned to org
+          } catch {
             setUser(null)
           }
-        } catch {
+        } else if (!user) {
           setUser(null)
         }
-      } else {
-        setUser(null)
-      }
-      setLoading(false)
-    })
+        setLoading(false)
+      })
 
-    return unsubscribe
-  }, [setUser, setLoading])
+      return () => {
+        clearTimeout(timeoutId)
+        unsubscribe()
+      }
+    } catch {
+      clearTimeout(timeoutId)
+      setLoading(false)
+    }
+  }, [setUser, setLoading, user])
 }
 
 export function useAuth() {

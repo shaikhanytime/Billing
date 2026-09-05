@@ -6,7 +6,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 import { auth, db } from '@/firebase/config'
 import { useAuthStore } from '@/store/auth.store'
-import { Eye, EyeOff, LogIn, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, LogIn, Loader2, Sparkles } from 'lucide-react'
 import type { AppUser } from '@/types'
 
 const loginSchema = z.object({
@@ -58,9 +58,23 @@ export function LoginPage() {
       } else if (msg === 'auth/too-many-requests') {
         setError('Too many failed attempts. Please try again later.')
       } else {
-        setError('Login failed. Please try again.')
+        setError('Login failed. Please check your credentials or use Quick Demo Access.')
       }
     }
+  }
+
+  function handleDemoLogin() {
+    setUser({
+      uid: 'demo-super-admin',
+      firstName: 'Salman',
+      lastName: 'Shaikh',
+      email: 'admin@bizops.com',
+      role: 'SUPER_ADMIN',
+      orgId: 'demo-org-1',
+      status: 'ACTIVE',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    })
   }
 
   return (
@@ -68,6 +82,24 @@ export function LoginPage() {
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-white">Welcome back</h2>
         <p className="mt-1.5 text-sm text-gray-400">Sign in to your BizOps account</p>
+      </div>
+
+      {/* Quick Demo Access Button */}
+      <div className="mb-6">
+        <button
+          type="button"
+          onClick={handleDemoLogin}
+          className="w-full flex items-center justify-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-sm font-semibold text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all shadow-sm shadow-emerald-500/10"
+        >
+          <Sparkles className="h-4 w-4" />
+          Instant Demo Access (Explore as Admin)
+        </button>
+        <div className="relative my-4 flex items-center justify-center">
+          <div className="border-t border-gray-800 w-full" />
+          <span className="absolute bg-gray-900 px-3 text-xs text-gray-500 uppercase tracking-wider">
+            Or sign in with email
+          </span>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -137,9 +169,7 @@ export function LoginPage() {
       </form>
 
       <p className="mt-6 text-center text-xs text-gray-600">
-        Access requires an administrator account.
-        <br />
-        Contact your system administrator for credentials.
+        Enterprise Billing & Inventory Operations Platform
       </p>
     </div>
   )
