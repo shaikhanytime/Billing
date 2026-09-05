@@ -79,8 +79,10 @@ function TopNav({
     logout()
   }
 
+  const currentCrumb = breadcrumbs[breadcrumbs.length - 1]
+
   return (
-    <header className="sticky top-0 z-30 flex h-[60px] items-center gap-4 border-b border-gray-800 bg-gray-900/95 backdrop-blur px-4 lg:px-6">
+    <header className="sticky top-0 z-30 flex h-[60px] items-center gap-3 border-b border-gray-800 bg-gray-900/95 backdrop-blur px-3 sm:px-4 lg:px-6">
       {/* Sidebar toggle */}
       <SidebarToggle
         collapsed={collapsed}
@@ -88,18 +90,25 @@ function TopNav({
         onMobileOpen={onMobileOpen}
       />
 
-      {/* Breadcrumbs */}
-      <nav className="hidden md:flex items-center gap-1.5 text-sm text-gray-500">
-        <Link to="/dashboard" className="hover:text-gray-300 transition-colors">
+      {/* Mobile Page Title */}
+      <div className="flex md:hidden items-center min-w-0">
+        <span className="text-sm font-semibold text-gray-200 truncate">
+          {currentCrumb ? currentCrumb.label : 'BizOps'}
+        </span>
+      </div>
+
+      {/* Desktop Breadcrumbs */}
+      <nav className="hidden md:flex items-center gap-1.5 text-sm text-gray-500 min-w-0">
+        <Link to="/dashboard" className="hover:text-gray-300 transition-colors shrink-0">
           <Home className="h-3.5 w-3.5" />
         </Link>
         {breadcrumbs.map((crumb) => (
-          <span key={crumb.href} className="flex items-center gap-1.5">
-            <ChevronRight className="h-3 w-3" />
+          <span key={crumb.href} className="flex items-center gap-1.5 min-w-0">
+            <ChevronRight className="h-3 w-3 shrink-0" />
             {crumb.isLast ? (
-              <span className="text-gray-300 font-medium">{crumb.label}</span>
+              <span className="text-gray-300 font-medium truncate">{crumb.label}</span>
             ) : (
-              <Link to={crumb.href} className="hover:text-gray-300 transition-colors">
+              <Link to={crumb.href} className="hover:text-gray-300 transition-colors truncate">
                 {crumb.label}
               </Link>
             )}
@@ -107,7 +116,7 @@ function TopNav({
         ))}
       </nav>
 
-      <div className="ml-auto flex items-center gap-2">
+      <div className="ml-auto flex items-center gap-1 sm:gap-2">
         {/* Notifications */}
         <button className="relative flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-white/5 hover:text-gray-200 transition-colors">
           <Bell className="h-4 w-4" />
@@ -118,9 +127,10 @@ function TopNav({
         <div className="relative">
           <button
             onClick={() => setProfileOpen((o) => !o)}
-            className="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 hover:bg-white/5 transition-colors"
+            className="flex items-center gap-2 rounded-lg p-1 sm:px-2.5 sm:py-1.5 hover:bg-white/5 transition-colors"
+            aria-label="User profile"
           >
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-xs font-semibold text-white">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-xs font-semibold text-white shrink-0">
               {user ? getInitials(user.firstName, user.lastName) : '?'}
             </div>
             <div className="hidden sm:block text-left">
@@ -131,7 +141,7 @@ function TopNav({
                 {user?.role?.toLowerCase().replace('_', ' ')}
               </p>
             </div>
-            <ChevronDown className="h-3.5 w-3.5 text-gray-500" />
+            <ChevronDown className="h-3.5 w-3.5 text-gray-500 hidden sm:block" />
           </button>
 
           {profileOpen && (
@@ -140,27 +150,27 @@ function TopNav({
                 className="fixed inset-0 z-10"
                 onClick={() => setProfileOpen(false)}
               />
-              <div className="absolute right-0 top-full mt-2 z-20 w-52 rounded-xl border border-gray-700 bg-gray-800 shadow-2xl py-1">
+              <div className="absolute right-0 top-full mt-2 z-20 w-56 max-w-[calc(100vw-1.5rem)] rounded-xl border border-gray-700 bg-gray-800 shadow-2xl py-1">
                 <div className="px-4 py-3 border-b border-gray-700">
-                  <p className="text-sm font-semibold text-gray-200">
+                  <p className="text-sm font-semibold text-gray-200 truncate">
                     {user?.firstName} {user?.lastName}
                   </p>
-                  <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                  <p className="text-xs text-gray-400 truncate">{user?.email}</p>
                 </div>
                 <div className="py-1">
-                  <button className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-400 hover:bg-white/5 hover:text-gray-200 transition-colors">
-                    <User className="h-4 w-4" />
+                  <button className="flex w-full items-center gap-3 px-4 py-2.5 sm:py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors">
+                    <User className="h-4 w-4 text-gray-400" />
                     Profile
                   </button>
-                  <button className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-400 hover:bg-white/5 hover:text-gray-200 transition-colors">
-                    <Settings className="h-4 w-4" />
+                  <button className="flex w-full items-center gap-3 px-4 py-2.5 sm:py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors">
+                    <Settings className="h-4 w-4 text-gray-400" />
                     Settings
                   </button>
                 </div>
                 <div className="border-t border-gray-700 py-1">
                   <button
                     onClick={handleLogout}
-                    className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                    className="flex w-full items-center gap-3 px-4 py-2.5 sm:py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
                   >
                     <LogOut className="h-4 w-4" />
                     Sign Out
@@ -193,7 +203,7 @@ export function AppLayout() {
           onToggle={() => setCollapsed((c) => !c)}
           onMobileOpen={() => setMobileOpen(true)}
         />
-        <main className={cn('flex-1 p-4 lg:p-6 page-enter')}>
+        <main className={cn('flex-1 p-3.5 sm:p-4 lg:p-6 pb-12 sm:pb-6 page-enter min-w-0')}>
           <Outlet />
         </main>
       </div>

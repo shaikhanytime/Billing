@@ -127,28 +127,28 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-white">
+          <h1 className="text-lg sm:text-xl font-bold text-white">
             {greeting()}, {user?.firstName}! 👋
           </h1>
-          <p className="text-sm text-gray-400 mt-0.5">
+          <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
             Here's what's happening with your business today.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-2 sm:flex gap-2">
           <Link
             to="/sales/invoices/new"
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-3.5 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-colors"
+            className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-3.5 py-2.5 sm:py-2 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-colors"
           >
             <TrendingUp className="h-3.5 w-3.5" />
             New Sale
           </Link>
           <Link
             to="/purchases/invoices/new"
-            className="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-3.5 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 transition-colors"
+            className="flex items-center justify-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-3.5 py-2.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-300 hover:bg-gray-700 transition-colors"
           >
             <ShoppingCart className="h-3.5 w-3.5" />
             New Purchase
@@ -157,7 +157,7 @@ export function DashboardPage() {
       </div>
 
       {/* Today's Key Metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <StatCard
           title="Today's Sales"
           value={stats?.todaySales ?? 0}
@@ -191,7 +191,7 @@ export function DashboardPage() {
       </div>
 
       {/* Business Overview */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         <StatCard title="Customers" value={isLoading ? '—' : stats?.totalCustomers ?? 0} icon={Users} color="blue" />
         <StatCard title="Suppliers" value={isLoading ? '—' : stats?.totalSuppliers ?? 0} icon={Building2} color="amber" />
         <StatCard title="Active Users" value={isLoading ? '—' : stats?.activeUsers ?? 0} icon={UserCheck} color="green" />
@@ -201,9 +201,9 @@ export function DashboardPage() {
       {/* Bottom: Quick Actions + Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Quick Actions */}
-        <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-5">
-          <h2 className="text-sm font-semibold text-gray-300 mb-4">Quick Actions</h2>
-          <div className="space-y-2">
+        <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-4 sm:p-5">
+          <h2 className="text-sm font-semibold text-gray-300 mb-3 sm:mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-1.5 sm:gap-2">
             {[
               { label: 'New Sale Invoice', href: '/sales/invoices/new', icon: TrendingUp, color: 'text-green-400' },
               { label: 'New Purchase', href: '/purchases/invoices/new', icon: ShoppingCart, color: 'text-blue-400' },
@@ -215,19 +215,19 @@ export function DashboardPage() {
               <Link
                 key={a.href}
                 to={a.href}
-                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-400 hover:bg-white/5 hover:text-gray-200 transition-colors group"
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors group min-h-[42px]"
               >
-                <a.icon className={`h-4 w-4 ${a.color}`} />
-                <span className="flex-1">{a.label}</span>
-                <ArrowRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <a.icon className={`h-4 w-4 ${a.color} shrink-0`} />
+                <span className="flex-1 truncate">{a.label}</span>
+                <ArrowRight className="h-3.5 w-3.5 text-gray-500 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
               </Link>
             ))}
           </div>
         </div>
 
         {/* Recent Activity */}
-        <div className="lg:col-span-2 rounded-xl border border-gray-800 bg-gray-900/60 p-5">
-          <div className="flex items-center justify-between mb-4">
+        <div className="lg:col-span-2 rounded-xl border border-gray-800 bg-gray-900/60 p-4 sm:p-5">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
             <h2 className="text-sm font-semibold text-gray-300">Recent Activity</h2>
             <Link to="/admin/users" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
               View all
@@ -246,16 +246,16 @@ export function DashboardPage() {
                     <Package className="h-3.5 w-3.5 text-blue-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-300">
+                    <p className="text-xs sm:text-sm text-gray-300">
                       {ACTION_LABELS[log.action as string] ?? log.action as string}
                     </p>
                     {log['entityType'] != null && (
-                      <p className="text-xs text-gray-600 truncate">
+                      <p className="text-[11px] sm:text-xs text-gray-500 truncate">
                         {String(log['entityType'])} {log['entityId'] ? `· #${String(log['entityId']).slice(-8)}` : ''}
                       </p>
                     )}
                   </div>
-                  <p className="shrink-0 text-[10px] text-gray-600 mt-0.5">
+                  <p className="shrink-0 text-[10px] sm:text-xs text-gray-500 mt-0.5">
                     {log.createdAt ? formatDateTime((log.createdAt as { toDate(): Date }).toDate?.() ?? log.createdAt as string) : ''}
                   </p>
                 </div>
