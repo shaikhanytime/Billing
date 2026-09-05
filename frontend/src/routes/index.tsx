@@ -18,6 +18,35 @@ const UsersPage = lazy(() =>
   import('@/features/admin/users/pages/UsersPage').then((m) => ({ default: m.UsersPage }))
 )
 
+// Inventory
+const ProductsPage = lazy(() =>
+  import('@/features/inventory/pages/ProductsPage').then((m) => ({ default: m.ProductsPage }))
+)
+
+// Parties
+const CustomersPage = lazy(() =>
+  import('@/features/parties/pages/CustomersPage').then((m) => ({ default: m.CustomersPage }))
+)
+const SuppliersPage = lazy(() =>
+  import('@/features/parties/pages/SuppliersPage').then((m) => ({ default: m.SuppliersPage }))
+)
+
+// Sales
+const SalesInvoicesPage = lazy(() =>
+  import('@/features/sales/pages/SalesInvoicesPage').then((m) => ({ default: m.SalesInvoicesPage }))
+)
+const CreateSaleInvoicePage = lazy(() =>
+  import('@/features/sales/pages/CreateSaleInvoicePage').then((m) => ({ default: m.CreateSaleInvoicePage }))
+)
+
+// Purchases
+const PurchaseInvoicesPage = lazy(() =>
+  import('@/features/purchases/pages/PurchaseInvoicesPage').then((m) => ({ default: m.PurchaseInvoicesPage }))
+)
+const CreatePurchaseInvoicePage = lazy(() =>
+  import('@/features/purchases/pages/CreatePurchaseInvoicePage').then((m) => ({ default: m.CreatePurchaseInvoicePage }))
+)
+
 // Placeholder component for pages not yet implemented
 function ComingSoon({ name }: { name: string }) {
   return (
@@ -63,7 +92,10 @@ const router = createBrowserRouter([
           },
 
           // ─── Inventory ───────────────────────────────────────────────────
-          { path: 'inventory/products', element: <ComingSoon name="Products" /> },
+          {
+            path: 'inventory/products',
+            element: <Suspense fallback={PageLoader}><ProductsPage /></Suspense>,
+          },
           { path: 'inventory/products/new', element: <ComingSoon name="Add Product" /> },
           { path: 'inventory/categories', element: <ComingSoon name="Categories" /> },
           { path: 'inventory/units', element: <ComingSoon name="Units" /> },
@@ -72,14 +104,26 @@ const router = createBrowserRouter([
           { path: 'inventory/adjustments/new', element: <ComingSoon name="New Adjustment" /> },
 
           // ─── Sales ────────────────────────────────────────────────────────
-          { path: 'sales/invoices', element: <ComingSoon name="Sales Invoices" /> },
-          { path: 'sales/invoices/new', element: <ComingSoon name="New Sale Invoice" /> },
+          {
+            path: 'sales/invoices',
+            element: <Suspense fallback={PageLoader}><SalesInvoicesPage /></Suspense>,
+          },
+          {
+            path: 'sales/invoices/new',
+            element: <Suspense fallback={PageLoader}><CreateSaleInvoicePage /></Suspense>,
+          },
           { path: 'sales/quotations', element: <ComingSoon name="Quotations" /> },
           { path: 'sales/returns', element: <ComingSoon name="Sales Returns" /> },
 
           // ─── Purchases ────────────────────────────────────────────────────
-          { path: 'purchases/invoices', element: <ComingSoon name="Purchase Invoices" /> },
-          { path: 'purchases/invoices/new', element: <ComingSoon name="New Purchase Invoice" /> },
+          {
+            path: 'purchases/invoices',
+            element: <Suspense fallback={PageLoader}><PurchaseInvoicesPage /></Suspense>,
+          },
+          {
+            path: 'purchases/invoices/new',
+            element: <Suspense fallback={PageLoader}><CreatePurchaseInvoicePage /></Suspense>,
+          },
           { path: 'purchases/returns', element: <ComingSoon name="Purchase Returns" /> },
 
           // ─── Payments ─────────────────────────────────────────────────────
@@ -89,9 +133,15 @@ const router = createBrowserRouter([
           { path: 'payments/made/new', element: <ComingSoon name="Make Payment" /> },
 
           // ─── Parties ──────────────────────────────────────────────────────
-          { path: 'parties/customers', element: <ComingSoon name="Customers" /> },
+          {
+            path: 'parties/customers',
+            element: <Suspense fallback={PageLoader}><CustomersPage /></Suspense>,
+          },
           { path: 'parties/customers/new', element: <ComingSoon name="Add Customer" /> },
-          { path: 'parties/suppliers', element: <ComingSoon name="Suppliers" /> },
+          {
+            path: 'parties/suppliers',
+            element: <Suspense fallback={PageLoader}><SuppliersPage /></Suspense>,
+          },
           { path: 'parties/suppliers/new', element: <ComingSoon name="Add Supplier" /> },
 
           // ─── Ledger ───────────────────────────────────────────────────────

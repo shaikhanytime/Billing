@@ -63,18 +63,23 @@ const ROLE_HIERARCHY: Record<RoleLevel, number> = {
   SUPER_ADMIN: 5,
 }
 
-export function requireRole(minRole: RoleLevel) {
+export function requireRole(...roles: RoleLevel[]) {
   return (req: AuthRequest, res: Response, next: NextFunction): void => {
-    const userLevel = ROLE_HIERARCHY[req.userRole as RoleLevel] ?? 0
-    const requiredLevel = ROLE_HIERARCHY[minRole]
-    if (userLevel < requiredLevel) {
-      res.status(403).json({
-        success: false,
-        message: 'Insufficient permissions',
-        error: { code: 'FORBIDDEN' },
-      })
-      return
+    const userRole = req.userRole as RoleLevel
+    const userLevel = ROLE_HIERARCHY[userRole] ?? 0
+    const minRequiredLevel = Math.min(...roles.map(r => ROLE_HIERARCHY[r] ?? 99))
+    
+    if (roles.includes(userRole) || userLevel >= minRequiredLevel) {
+      return next()
     }
-    next()
+
+    res.status(403).json({
+      success: false,
+      message: 'Insufficient permissions',
+      error: { code: 'FORBIDDEN' },
+    })
   }
 }
+
+export const authenticate = authMiddleware
+

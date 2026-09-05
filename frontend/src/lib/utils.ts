@@ -14,6 +14,10 @@ export function formatCurrency(amount: number): string {
   }).format(amount)
 }
 
+export function formatPaise(paise: number = 0): string {
+  return formatCurrency(paise / 100)
+}
+
 export function formatDate(date: string | Date, fmt = 'dd MMM yyyy'): string {
   const d = typeof date === 'string' ? parseISO(date) : date
   return format(d, fmt)
