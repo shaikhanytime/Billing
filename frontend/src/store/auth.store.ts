@@ -24,7 +24,7 @@ export const useAuthStore = create<AuthState>()(
       logout: () => set({ user: null, orgId: null, isLoading: false }),
     }),
     {
-      name: 'bizops-auth',
+      name: 'billinganytime-auth',
       partialize: (state) => ({ user: state.user, orgId: state.orgId }),
     }
   )

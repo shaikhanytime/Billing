@@ -1,7 +1,7 @@
 {
-  "name": "bizops-backend",
+  "name": "billinganytime-backend",
   "version": "1.0.0",
-  "description": "BizOps Backend — Firebase Cloud Functions",
+  "description": "BillingAnytime Backend — Firebase Cloud Functions",
   "main": "lib/index.js",
   "engines": {
     "node": "20"

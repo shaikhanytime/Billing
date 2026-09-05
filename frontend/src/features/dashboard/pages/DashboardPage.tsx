@@ -171,39 +171,39 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-4 sm:space-y-5 pb-8 max-w-7xl mx-auto">
-      {/* ─── Top Promotional & Quick Feature Banners ─── */}
+      {/* ─── Top Promotional & Quick Feature Banners (SAP Horizon Morning Gradients) ─── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
         {/* Banner 1: Cashflo AI Collection */}
         {!banner1Dismissed && (
-          <div className="relative overflow-hidden rounded-xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950/40 via-gray-900 to-gray-900 p-4 sm:p-5 flex items-center justify-between shadow-sm">
+          <div className="relative overflow-hidden rounded-xl border border-emerald-200 bg-gradient-to-r from-emerald-50/90 via-teal-50/50 to-white p-4 sm:p-5 flex items-center justify-between shadow-xs">
             <button
               onClick={() => setBanner1Dismissed(true)}
-              className="absolute top-2.5 right-2.5 p-1 rounded-full text-gray-400 hover:text-gray-200 hover:bg-white/10 transition-colors"
+              className="absolute top-2.5 right-2.5 p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-emerald-100/60 transition-colors"
               aria-label="Dismiss banner"
             >
               <X className="h-4 w-4" />
             </button>
-            <div className="space-y-1.5 pr-4 z-10 max-w-[70%]">
-              <p className="text-sm sm:text-base font-bold text-white leading-tight">
+            <div className="space-y-1 pr-4 z-10 max-w-[70%]">
+              <p className="text-sm sm:text-base font-bold text-slate-900 leading-tight">
                 ₹10 Lakh+ stuck?
               </p>
-              <p className="text-xs text-gray-400 leading-relaxed line-clamp-2">
+              <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">
                 myCashflo AI calls all of your parties, daily for automated payment collection.
               </p>
               <button
                 onClick={() => navigate('/parties/customers')}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:underline pt-1 cursor-pointer"
+                className="inline-flex items-center gap-1 text-xs font-bold text-[#15803D] hover:text-emerald-800 hover:underline pt-1 cursor-pointer"
               >
                 <span>Book demo</span>
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </button>
             </div>
-            {/* 3D Illustration Graphics */}
+            {/* 3D Graphic */}
             <div className="relative shrink-0 flex items-center justify-center">
-              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 p-0.5 shadow-lg shadow-emerald-500/20 rotate-3">
-                <div className="h-full w-full bg-gray-900 rounded-[14px] flex flex-col items-center justify-center text-emerald-400">
-                  <PhoneCall className="h-7 w-7 animate-bounce text-emerald-400" />
-                  <span className="text-[9px] font-mono mt-1 font-bold text-emerald-300">AI CALLS</span>
+              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 p-0.5 shadow-sm rotate-3">
+                <div className="h-full w-full bg-white rounded-[14px] flex flex-col items-center justify-center text-emerald-600">
+                  <PhoneCall className="h-7 w-7 text-emerald-600 animate-bounce" />
+                  <span className="text-[9px] font-mono mt-0.5 font-bold text-emerald-700">AI CALLS</span>
                 </div>
               </div>
             </div>
@@ -211,17 +211,17 @@ export function DashboardPage() {
         )}
 
         {/* Banner 2: Staff Management */}
-        <div className="relative overflow-hidden rounded-xl border border-blue-500/30 bg-gradient-to-r from-blue-950/40 via-gray-900 to-gray-900 p-4 sm:p-5 flex items-center justify-between shadow-sm">
-          <div className="space-y-1.5 pr-4 z-10 max-w-[70%]">
-            <p className="text-sm sm:text-base font-bold text-white leading-tight">
+        <div className="relative overflow-hidden rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50/90 via-indigo-50/50 to-white p-4 sm:p-5 flex items-center justify-between shadow-xs">
+          <div className="space-y-1 pr-4 z-10 max-w-[70%]">
+            <p className="text-sm sm:text-base font-bold text-slate-900 leading-tight">
               Manage Staff Smarter
             </p>
-            <p className="text-xs text-gray-400 leading-relaxed line-clamp-2">
+            <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">
               Track Staff's attendance, live location, orders and field activity seamlessly.
             </p>
             <button
               onClick={() => navigate('/admin/users')}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-blue-400 hover:text-blue-300 hover:underline pt-1 cursor-pointer"
+              className="inline-flex items-center gap-1 text-xs font-bold text-[#0070F2] hover:text-blue-800 hover:underline pt-1 cursor-pointer"
             >
               <span>Manage Staff Now</span>
               <ArrowUpRight className="h-3.5 w-3.5" />
@@ -229,10 +229,10 @@ export function DashboardPage() {
           </div>
           {/* Mobile App mockup graphic */}
           <div className="relative shrink-0 flex items-center justify-center">
-            <div className="h-16 w-14 sm:h-20 sm:w-16 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 p-0.5 shadow-lg shadow-blue-500/20 -rotate-2">
-              <div className="h-full w-full bg-gray-900 rounded-[10px] flex flex-col items-center justify-center text-blue-400 p-1">
-                <Smartphone className="h-6 w-6 text-blue-400" />
-                <div className="w-6 h-1 bg-blue-500/40 rounded-full mt-1.5" />
+            <div className="h-16 w-14 sm:h-20 sm:w-16 rounded-xl bg-gradient-to-tr from-[#0070F2] to-indigo-500 p-0.5 shadow-sm -rotate-2">
+              <div className="h-full w-full bg-white rounded-[10px] flex flex-col items-center justify-center text-[#0070F2] p-1">
+                <Smartphone className="h-6 w-6 text-[#0070F2]" />
+                <div className="w-6 h-1 bg-blue-400/40 rounded-full mt-1.5" />
               </div>
             </div>
           </div>
@@ -240,20 +240,20 @@ export function DashboardPage() {
       </div>
 
       {/* ─── Business Overview Header & Metric Cards ─── */}
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm sm:text-base font-bold text-white tracking-tight">
+          <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
             Business Overview
           </h2>
-          <div className="flex items-center gap-2 text-xs text-gray-400">
+          <div className="flex items-center gap-2 text-xs text-slate-500">
             <span>Last Update: {formatDate(new Date().toISOString())} | {lastUpdated}</span>
             <button
               onClick={() => refresh()}
               disabled={isFetching}
               title="Refresh stats"
-              className="p-1 rounded-md text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+              className="p-1 rounded-md text-slate-400 hover:text-slate-800 hover:bg-slate-200/60 transition-colors"
             >
-              <RotateCw className={cn('h-3.5 w-3.5', isFetching && 'animate-spin text-blue-400')} />
+              <RotateCw className={cn('h-3.5 w-3.5', isFetching && 'animate-spin text-[#0070F2]')} />
             </button>
           </div>
         </div>
@@ -263,16 +263,16 @@ export function DashboardPage() {
           {/* Card 1: To Collect */}
           <Link
             to="/parties/customers"
-            className="group block rounded-xl border border-emerald-500/25 bg-emerald-950/20 hover:bg-emerald-950/30 p-4 sm:p-5 transition-all shadow-sm hover:border-emerald-500/40"
+            className="group block rounded-xl border border-[#BBF7D0] bg-[#F0FDF4] hover:bg-[#DCFCE7]/70 p-4 sm:p-5 transition-all shadow-xs hover:border-emerald-400"
           >
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-emerald-400">
+              <div className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#15803D]">
                 <ArrowDownLeft className="h-4 w-4" />
                 <span>To Collect</span>
               </div>
-              <ArrowUpRight className="h-4 w-4 text-emerald-500/50 group-hover:text-emerald-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+              <ArrowUpRight className="h-4 w-4 text-emerald-600/70 group-hover:text-emerald-700 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
             </div>
-            <p className="mt-2 text-2xl sm:text-3xl font-bold text-white font-mono tracking-tight">
+            <p className="mt-2 text-2xl sm:text-3xl font-bold text-slate-950 font-mono tracking-tight">
               {formatCurrency(toCollect)}
             </p>
           </Link>
@@ -280,16 +280,16 @@ export function DashboardPage() {
           {/* Card 2: To Pay */}
           <Link
             to="/parties/suppliers"
-            className="group block rounded-xl border border-rose-500/25 bg-rose-950/20 hover:bg-rose-950/30 p-4 sm:p-5 transition-all shadow-sm hover:border-rose-500/40"
+            className="group block rounded-xl border border-[#FECDD3] bg-[#FFF1F2] hover:bg-[#FFE4E6]/70 p-4 sm:p-5 transition-all shadow-xs hover:border-rose-400"
           >
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-rose-400">
+              <div className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#BE123C]">
                 <ArrowUpRight className="h-4 w-4" />
                 <span>To Pay</span>
               </div>
-              <ArrowUpRight className="h-4 w-4 text-rose-500/50 group-hover:text-rose-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+              <ArrowUpRight className="h-4 w-4 text-rose-600/70 group-hover:text-rose-700 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
             </div>
-            <p className="mt-2 text-2xl sm:text-3xl font-bold text-white font-mono tracking-tight">
+            <p className="mt-2 text-2xl sm:text-3xl font-bold text-slate-950 font-mono tracking-tight">
               {formatCurrency(toPay)}
             </p>
           </Link>
@@ -297,16 +297,16 @@ export function DashboardPage() {
           {/* Card 3: Total Cash + Bank Balance */}
           <Link
             to="/ledger/party"
-            className="group block rounded-xl border border-blue-500/25 bg-blue-950/20 hover:bg-blue-950/30 p-4 sm:p-5 transition-all shadow-sm hover:border-blue-500/40"
+            className="group block rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] hover:bg-[#DBEAFE]/70 p-4 sm:p-5 transition-all shadow-xs hover:border-blue-400"
           >
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-blue-400">
+              <div className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#1D4ED8]">
                 <Landmark className="h-4 w-4" />
                 <span>Total Cash + Bank Balance</span>
               </div>
-              <ArrowUpRight className="h-4 w-4 text-blue-500/50 group-hover:text-blue-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+              <ArrowUpRight className="h-4 w-4 text-blue-600/70 group-hover:text-blue-700 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
             </div>
-            <p className="mt-2 text-2xl sm:text-3xl font-bold text-white font-mono tracking-tight">
+            <p className="mt-2 text-2xl sm:text-3xl font-bold text-slate-950 font-mono tracking-tight">
               {formatCurrency(cashBank)}
             </p>
           </Link>
@@ -316,12 +316,12 @@ export function DashboardPage() {
       {/* ─── Middle Section: Latest Transactions + Today's Checklist ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Left 2/3: Latest Transactions */}
-        <div className="lg:col-span-2 rounded-xl border border-gray-800 bg-gray-900/60 p-4 sm:p-5 flex flex-col justify-between">
+        <div className="lg:col-span-2 rounded-xl border border-slate-200 bg-white p-4 sm:p-5 flex flex-col justify-between shadow-xs">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-bold text-gray-200">Latest Transactions</h3>
+            <h3 className="text-sm font-bold text-slate-900">Latest Transactions</h3>
             <Link
               to="/sales/invoices"
-              className="text-xs text-blue-400 hover:text-blue-300 transition-colors font-medium"
+              className="text-xs text-[#0070F2] hover:underline font-semibold"
             >
               View all
             </Link>
@@ -332,30 +332,30 @@ export function DashboardPage() {
             <div className="flex flex-col items-center justify-center py-10 text-center space-y-3">
               {/* Clean document illustration */}
               <div className="relative flex items-center justify-center">
-                <div className="h-16 w-16 rounded-2xl bg-gray-800/80 border border-gray-700/80 flex items-center justify-center shadow-inner">
-                  <FileText className="h-8 w-8 text-gray-500" />
+                <div className="h-16 w-16 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center shadow-inner">
+                  <FileText className="h-8 w-8 text-slate-400" />
                 </div>
-                <div className="absolute -bottom-1 -right-1 bg-indigo-600 text-white rounded-full p-1 shadow-md">
+                <div className="absolute -bottom-1 -right-1 bg-[#0070F2] text-white rounded-full p-1 shadow-xs">
                   <Sparkles className="h-3 w-3" />
                 </div>
               </div>
               <div>
-                <p className="text-sm font-bold text-gray-200">No transactions made yet!</p>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-sm font-bold text-slate-800">No transactions made yet!</p>
+                <p className="text-xs text-slate-500 mt-0.5">
                   Create your first transaction to start seeing your data
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 pt-1">
                 <Link
                   to="/sales/invoices/new"
-                  className="flex items-center gap-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors"
+                  className="flex items-center gap-1.5 rounded-lg bg-[#0070F2] hover:bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition-colors"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>Create Sale Invoice</span>
                 </Link>
                 <Link
                   to="/purchases/invoices/new"
-                  className="flex items-center gap-1.5 rounded-lg border border-gray-700 bg-gray-800 hover:bg-gray-700 px-3 py-1.5 text-xs font-medium text-gray-300 transition-colors"
+                  className="flex items-center gap-1.5 rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>Create Purchase</span>
@@ -366,7 +366,7 @@ export function DashboardPage() {
             <div className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-gray-800 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                  <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                     <th className="px-3 py-2.5">Date</th>
                     <th className="px-3 py-2.5">Type</th>
                     <th className="px-3 py-2.5">Txn No</th>
@@ -374,33 +374,33 @@ export function DashboardPage() {
                     <th className="px-3 py-2.5 text-right">Amount</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-800/60">
+                <tbody className="divide-y divide-slate-100">
                   {transactions.map((tx) => (
-                    <tr key={tx.id} className="hover:bg-white/2 transition-colors">
-                      <td className="px-3 py-2.5 text-gray-400 whitespace-nowrap">
+                    <tr key={tx.id} className="hover:bg-slate-50/80 transition-colors text-slate-700">
+                      <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">
                         {formatDate(tx.date)}
                       </td>
                       <td className="px-3 py-2.5 whitespace-nowrap">
                         <span
                           className={cn(
-                            'inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold',
+                            'inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold',
                             tx.type === 'SALE'
-                              ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                               : tx.type === 'PURCHASE'
-                              ? 'bg-blue-500/15 text-blue-400 border border-blue-500/30'
-                              : 'bg-purple-500/15 text-purple-400 border border-purple-500/30'
+                              ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                              : 'bg-purple-50 text-purple-700 border border-purple-200'
                           )}
                         >
                           {tx.type.replace('_', ' ')}
                         </span>
                       </td>
-                      <td className="px-3 py-2.5 font-mono text-gray-300 whitespace-nowrap">
+                      <td className="px-3 py-2.5 font-mono text-slate-800 font-semibold whitespace-nowrap">
                         {tx.txnNo}
                       </td>
-                      <td className="px-3 py-2.5 font-medium text-gray-200 truncate max-w-[140px]">
+                      <td className="px-3 py-2.5 font-medium text-slate-900 truncate max-w-[140px]">
                         {tx.partyName}
                       </td>
-                      <td className="px-3 py-2.5 text-right font-mono font-semibold text-white whitespace-nowrap">
+                      <td className="px-3 py-2.5 text-right font-mono font-bold text-slate-950 whitespace-nowrap">
                         {formatCurrency(tx.amount)}
                       </td>
                     </tr>
@@ -412,40 +412,39 @@ export function DashboardPage() {
         </div>
 
         {/* Right 1/3: Today's Checklist */}
-        <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-4 sm:p-5 flex flex-col justify-between">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 flex flex-col justify-between shadow-xs">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-bold text-gray-200">Today's Checklist</h3>
-            <span className="text-[10px] font-semibold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/20">
+            <h3 className="text-sm font-bold text-slate-900">Today's Checklist</h3>
+            <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
               Beta
             </span>
           </div>
 
           <div className="flex flex-col items-center justify-center py-8 text-center space-y-3">
-            {/* Traffic cones / coming soon illustration */}
-            <div className="h-16 w-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+            <div className="h-16 w-16 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
               <Clock className="h-8 w-8" />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-200">Coming Soon...</p>
-              <p className="text-xs text-gray-500 mt-1 max-w-[200px] leading-relaxed">
+              <p className="text-sm font-bold text-slate-800">Coming Soon...</p>
+              <p className="text-xs text-slate-500 mt-1 max-w-[200px] leading-relaxed">
                 Smarter daily checklist for overdue invoices and party follow-ups.
               </p>
             </div>
           </div>
 
-          <div className="border-t border-gray-800/80 pt-3 flex items-center justify-between text-xs text-gray-500">
+          <div className="border-t border-slate-100 pt-3 flex items-center justify-between text-xs text-slate-500">
             <span>Pending follow-ups</span>
-            <span className="font-bold text-gray-400 font-mono">0</span>
+            <span className="font-bold text-slate-800 font-mono">0</span>
           </div>
         </div>
       </div>
 
       {/* ─── Bottom Section: Sales Report Chart ─── */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-4 sm:p-5">
+      <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-blue-400" />
-            <h3 className="text-sm font-bold text-gray-200">
+            <Calendar className="h-4 w-4 text-[#0070F2]" />
+            <h3 className="text-sm font-bold text-slate-900">
               Sales Report - Last 7 Days
             </h3>
           </div>
@@ -456,19 +455,19 @@ export function DashboardPage() {
               <select
                 value={salesPeriod}
                 onChange={(e) => setSalesPeriod(e.target.value as 'Daily' | 'Weekly' | 'Monthly')}
-                className="appearance-none bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 pr-8 text-xs text-gray-300 font-medium outline-none focus:border-blue-500 cursor-pointer"
+                className="appearance-none bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 pr-8 text-xs text-slate-700 font-semibold outline-none focus:border-[#0070F2] cursor-pointer"
               >
                 <option value="Daily">Daily</option>
                 <option value="Weekly">Weekly</option>
                 <option value="Monthly">Monthly</option>
               </select>
-              <ChevronDown className="h-3.5 w-3.5 text-gray-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <ChevronDown className="h-3.5 w-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
 
             {/* Total summary */}
             <div className="text-right">
-              <p className="text-[10px] text-gray-500 font-medium">Last 7 days sales</p>
-              <p className="text-sm font-bold text-white font-mono">
+              <p className="text-[10px] text-slate-500 font-medium">Last 7 days sales</p>
+              <p className="text-sm font-bold text-slate-950 font-mono">
                 {formatCurrency(last7DaysTotal)}
               </p>
             </div>
@@ -479,19 +478,21 @@ export function DashboardPage() {
         <div className="h-48 sm:h-56 w-full pt-2">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1f293d" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
               <XAxis dataKey="day" stroke="#64748b" fontSize={11} tickLine={false} />
               <YAxis stroke="#64748b" fontSize={11} tickLine={false} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#0f172a',
-                  borderColor: '#334155',
+                  backgroundColor: '#FFFFFF',
+                  borderColor: '#CBD5E1',
                   borderRadius: '0.5rem',
                   fontSize: '12px',
+                  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.08)',
+                  color: '#1E293B',
                 }}
                 formatter={(val) => [formatCurrency(Number(val) || 0), 'Sales']}
               />
-              <Bar dataKey="sales" fill="#6366f1" radius={[4, 4, 0, 0]} maxBarSize={36} />
+              <Bar dataKey="sales" fill="#0070F2" radius={[4, 4, 0, 0]} maxBarSize={36} />
             </BarChart>
           </ResponsiveContainer>
         </div>

@@ -1,4 +1,4 @@
-# BizOps — Business Operations Platform
+# BillingAnytime — Enterprise Billing & Inventory Platform
 
 A complete Billing & Inventory Management system for Retailers, Wholesalers, and Manufacturers.
 

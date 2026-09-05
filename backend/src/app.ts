@@ -17,7 +17,7 @@ app.use(express.urlencoded({ extended: true }))
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
-  res.json({ success: true, message: 'BizOps API is running', data: { version: '1.0.0', phase: 1 } })
+  res.json({ success: true, message: 'BillingAnytime API is running', data: { version: '1.0.0', phase: 1 } })
 })
 
 // ─── Routes ───────────────────────────────────────────────────────────────────

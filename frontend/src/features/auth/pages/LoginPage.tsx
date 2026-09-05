@@ -138,9 +138,9 @@ export function LoginPage() {
   function handleDemoLogin() {
     setUser({
       uid: 'demo-super-admin',
-      firstName: 'Salman',
-      lastName: 'Shaikh',
-      email: 'admin@bizops.com',
+      firstName: 'User',
+      lastName: 'Admin',
+      email: 'admin@billinganytime.com',
       role: 'SUPER_ADMIN',
       orgId: 'demo-org-1',
       status: 'ACTIVE',
@@ -152,8 +152,8 @@ export function LoginPage() {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-white">Welcome back</h2>
-        <p className="mt-1.5 text-sm text-gray-400">Sign in to your BizOps account</p>
+        <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Welcome back</h2>
+        <p className="mt-1.5 text-sm text-slate-500">Sign in to your BillingAnytime account</p>
       </div>
 
       {/* Google Sign-In Button */}
@@ -162,10 +162,10 @@ export function LoginPage() {
           type="button"
           onClick={handleGoogleSignIn}
           disabled={isGoogleLoading}
-          className="w-full flex items-center justify-center gap-3 rounded-lg border border-gray-700 bg-gray-800/80 hover:bg-gray-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:border-gray-600 transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+          className="w-full flex items-center justify-center gap-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-xs hover:border-slate-300 transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
         >
           {isGoogleLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+            <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
           ) : (
             <svg className="h-4 w-4" viewBox="0 0 24 24">
               <path
@@ -193,15 +193,15 @@ export function LoginPage() {
         <button
           type="button"
           onClick={handleDemoLogin}
-          className="w-full flex items-center justify-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 hover:border-emerald-500/50 px-4 py-2.5 text-sm font-semibold text-emerald-400 transition-all shadow-sm shadow-emerald-500/10 cursor-pointer"
+          className="w-full flex items-center justify-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 hover:border-emerald-300 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition-all shadow-xs cursor-pointer"
         >
-          <Sparkles className="h-4 w-4" />
+          <Sparkles className="h-4 w-4 text-emerald-600" />
           Instant Demo Access (Explore as Admin)
         </button>
 
         <div className="relative my-4 flex items-center justify-center">
-          <div className="border-t border-gray-800 w-full" />
-          <span className="absolute bg-gray-900 px-3 text-xs text-gray-500 uppercase tracking-wider">
+          <div className="border-t border-slate-200 w-full" />
+          <span className="absolute bg-white px-3 text-xs text-slate-400 uppercase tracking-wider font-semibold">
             Or sign in with email
           </span>
         </div>
@@ -210,24 +210,24 @@ export function LoginPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-5">
         {/* Email */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">
+          <label className="block text-sm font-semibold text-slate-700 mb-1.5">
             Email Address
           </label>
           <input
             {...register('email')}
             type="email"
             autoComplete="email"
-            placeholder="admin@business.com"
-            className="w-full rounded-lg border border-gray-700 bg-gray-800/50 px-4 py-3 sm:py-2.5 text-base sm:text-sm text-gray-200 placeholder-gray-500 outline-none transition-all focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 min-h-[44px]"
+            placeholder="admin@billinganytime.com"
+            className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 sm:py-2.5 text-base sm:text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:border-[#0070F2] focus:ring-1 focus:ring-[#0070F2]/30 shadow-xs min-h-[44px]"
           />
           {errors.email && (
-            <p className="mt-1 text-xs text-red-400">{errors.email.message}</p>
+            <p className="mt-1 text-xs text-rose-600">{errors.email.message}</p>
           )}
         </div>
 
         {/* Password */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">
+          <label className="block text-sm font-semibold text-slate-700 mb-1.5">
             Password
           </label>
           <div className="relative">
@@ -236,25 +236,25 @@ export function LoginPage() {
               type={showPass ? 'text' : 'password'}
               autoComplete="current-password"
               placeholder="••••••••"
-              className="w-full rounded-lg border border-gray-700 bg-gray-800/50 px-4 py-3 sm:py-2.5 pr-10 text-base sm:text-sm text-gray-200 placeholder-gray-500 outline-none transition-all focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 min-h-[44px]"
+              className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 sm:py-2.5 pr-10 text-base sm:text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:border-[#0070F2] focus:ring-1 focus:ring-[#0070F2]/30 shadow-xs min-h-[44px]"
             />
             <button
               type="button"
               onClick={() => setShowPass((s) => !s)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-200 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 transition-colors"
             >
               {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
           {errors.password && (
-            <p className="mt-1 text-xs text-red-400">{errors.password.message}</p>
+            <p className="mt-1 text-xs text-rose-600">{errors.password.message}</p>
           )}
         </div>
 
         {/* Global error */}
         {error && (
-          <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3">
-            <p className="text-sm text-red-400">{error}</p>
+          <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3">
+            <p className="text-sm font-medium text-rose-700">{error}</p>
           </div>
         )}
 
@@ -262,7 +262,7 @@ export function LoginPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 sm:py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:bg-blue-500 hover:shadow-blue-500/40 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer min-h-[44px]"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#0070F2] px-4 py-3 sm:py-2.5 text-sm font-semibold text-white shadow-md shadow-blue-500/20 transition-all hover:bg-[#0058C9] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer min-h-[44px]"
         >
           {isSubmitting ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -273,8 +273,8 @@ export function LoginPage() {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-xs text-gray-600">
-        Enterprise Billing & Inventory Operations Platform
+      <p className="mt-6 text-center text-xs text-slate-400">
+        BillingAnytime — Enterprise Billing & Inventory Platform
       </p>
     </div>
   )

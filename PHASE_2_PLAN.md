@@ -1,4 +1,4 @@
-# 📦 BizOps — Phase 2: Inventory Management & Barcode Engine
+# 📦 BillingAnytime — Phase 2: Inventory Management & Barcode Engine
 
 > **Module Goal**: Deliver an enterprise-grade, high-performance Inventory Management system with multi-warehouse tracking, real-time stock ledger, HSN & GST compliance, automated barcode generation (EAN-13 & Code128), thermal/A4 label printing, and live camera + USB barcode scanning.
 
