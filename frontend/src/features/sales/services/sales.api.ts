@@ -87,7 +87,7 @@ export interface CreateSaleInvoicePayload {
 export const salesApi = {
   async getInvoices(params?: { documentType?: string; partyId?: string; paymentStatus?: string }): Promise<SaleInvoice[]> {
     const res = await apiClient.get<{ success: boolean; data: SaleInvoice[] }>('/api/sales', { params })
-    return res.data.data
+    return res.data?.data ?? []
   },
 
   async getInvoiceById(id: string): Promise<SaleInvoice> {

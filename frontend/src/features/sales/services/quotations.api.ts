@@ -131,7 +131,7 @@ export const quotationsApi = {
     search?: string
   }): Promise<Quotation[]> {
     const res = await apiClient.get<{ success: boolean; data: Quotation[] }>('/api/sales/quotations', { params })
-    return res.data.data
+    return res.data?.data ?? []
   },
 
   async getQuotationById(id: string): Promise<Quotation> {

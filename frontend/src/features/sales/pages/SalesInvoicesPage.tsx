@@ -15,9 +15,10 @@ export function SalesInvoicesPage() {
     try {
       setLoading(true)
       const data = await salesApi.getInvoices({ paymentStatus: statusFilter || undefined })
-      setInvoices(data)
+      setInvoices(Array.isArray(data) ? data : [])
     } catch (err) {
       console.error('Failed to fetch sales invoices', err)
+      setInvoices([])
     } finally {
       setLoading(false)
     }
@@ -27,8 +28,9 @@ export function SalesInvoicesPage() {
     fetchInvoices()
   }, [statusFilter])
 
-  const totalSalesPaise = invoices.reduce((sum, inv) => sum + (inv.totalAmountPaise || 0), 0)
-  const totalDuePaise = invoices.reduce((sum, inv) => sum + (inv.balanceDuePaise || 0), 0)
+  const safeInvoices = invoices || []
+  const totalSalesPaise = safeInvoices.reduce((sum, inv) => sum + (inv.totalAmountPaise || 0), 0)
+  const totalDuePaise = safeInvoices.reduce((sum, inv) => sum + (inv.balanceDuePaise || 0), 0)
 
   return (
     <div className="space-y-6">

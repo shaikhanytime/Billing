@@ -42,9 +42,10 @@ export function QuotationsPage() {
       const data = await quotationsApi.getQuotations({
         status: statusFilter === 'ALL' ? undefined : (statusFilter as QuotationStatus),
       })
-      setQuotations(data)
+      setQuotations(Array.isArray(data) ? data : [])
     } catch (err) {
       console.error('Failed to fetch quotations', err)
+      setQuotations([])
     } finally {
       setLoading(false)
     }
@@ -82,7 +83,8 @@ export function QuotationsPage() {
     }
   }
 
-  const filteredQuotations = quotations.filter((q) => {
+  const safeQuotations = quotations || []
+  const filteredQuotations = safeQuotations.filter((q) => {
     if (!search.trim()) return true
     const s = search.toLowerCase()
     return (
@@ -92,9 +94,9 @@ export function QuotationsPage() {
     )
   })
 
-  const totalQuotedPaise = quotations.reduce((sum, q) => sum + (q.totalAmountPaise || 0), 0)
-  const acceptedCount = quotations.filter((q) => q.quotationStatus === 'ACCEPTED').length
-  const convertedCount = quotations.filter((q) => q.quotationStatus === 'CONVERTED').length
+  const totalQuotedPaise = safeQuotations.reduce((sum, q) => sum + (q.totalAmountPaise || 0), 0)
+  const acceptedCount = safeQuotations.filter((q) => q.quotationStatus === 'ACCEPTED').length
+  const convertedCount = safeQuotations.filter((q) => q.quotationStatus === 'CONVERTED').length
 
   const getStatusBadge = (status: QuotationStatus) => {
     switch (status) {

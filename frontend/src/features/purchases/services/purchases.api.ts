@@ -89,7 +89,7 @@ export interface CreatePurchaseInvoicePayload {
 export const purchasesApi = {
   async getInvoices(params?: { partyId?: string; paymentStatus?: string }): Promise<PurchaseInvoice[]> {
     const res = await apiClient.get<{ success: boolean; data: PurchaseInvoice[] }>('/api/purchases', { params })
-    return res.data.data
+    return res.data?.data ?? []
   },
 
   async getInvoiceById(id: string): Promise<PurchaseInvoice> {
