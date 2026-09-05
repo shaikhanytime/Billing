@@ -74,4 +74,30 @@ const costIn = 1300000 // ₹130.00
 const newWac = Math.round((qCurr * wacCurr + qIn * costIn) / (qCurr + qIn))
 assert(newWac === 1100000, 'WAC recalculates deterministically to ₹110.00 (1,100,000 Micro-Paise)')
 
-console.log('✨ ALL FINANCIAL INVARIANTS SATISFIED DETERMINISTICALLY! ✨')
+// Invariant 8: Deterministic Multi-Unit Quantity Conversion (1 BOX = 24 PCS)
+import { UnitsService } from '../modules/units/units.service'
+const box1 = scaleQuantity(1) // 1000 scaled units (1 BOX)
+const pcsConverted = UnitsService.toBaseQuantity(box1, 24, 1)
+assert(pcsConverted === 24000, '1.000 BOX converts deterministically to 24000 scaled base units (24 PCS)')
+assert(unscaleQuantity(pcsConverted) === 24, '24000 scaled units unscale to exactly 24 PCS')
+
+// Invariant 9: Fractional Secondary Quantity Conversion (2.5 BOX = 60 PCS)
+const box2_5 = scaleQuantity(2.5) // 2500 scaled units (2.5 BOX)
+const pcs2_5 = UnitsService.toBaseQuantity(box2_5, 24, 1)
+assert(pcs2_5 === 60000, '2.500 BOX converts deterministically to 60000 scaled base units (60 PCS)')
+assert(unscaleQuantity(pcs2_5) === 60, '60000 scaled units unscale to exactly 60 PCS')
+
+// Invariant 10: Rational / Fractional Conversion Ratio (3 Meters = 10 Feet)
+const meter3 = scaleQuantity(3) // 3000 scaled units
+const feetConverted = UnitsService.toBaseQuantity(meter3, 10, 3)
+assert(feetConverted === 10000, '3.000 Meters converts with rational (10/3) to 10000 scaled base units (10 Feet)')
+
+// Invariant 11: Packaged Price Conversion
+// Base price ₹10.50 / PCS (1050 Paise) -> 1 BOX of 24 PCS should be ₹252.00 (25200 Paise)
+const basePricePaise = 1050
+const boxPricePaise = UnitsService.toPackagedPricePaise(basePricePaise, 24, 1)
+assert(boxPricePaise === 25200, '₹10.50 / PCS converts deterministically to ₹252.00 / BOX')
+assert(UnitsService.toBasePricePaise(boxPricePaise, 24, 1) === 1050, '₹252.00 / BOX reverses to ₹10.50 / PCS')
+
+console.log('✨ ALL FINANCIAL & UNIT CONVERSION INVARIANTS SATISFIED DETERMINISTICALLY! ✨')
+

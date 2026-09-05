@@ -67,33 +67,82 @@ graph TD
 
 ---
 
-## 4. Architectural Specifications & Backend Contracts
+## 4. Architectural Specifications & Hardened Backend Contracts
 
-### Module E: Alternate Units & Multi-Unit Conversion Engine
-*Must be implemented first because Line Items across Quotations, Sales, Purchases, and Returns depend on Unit Multipliers.*
+### 4.1 Hardened Financial & Domain Rules (Phase 2.2.1 Compliance)
 
-#### 1. Domain Mathematical Precision
-- Base Unit is canonical storage unit ($Q_{base}$ scaled by 1,000).
-- Secondary Unit has a fixed multiplier $M$ ($M \ge 1$, integer or exact rational).
-- Conversion Formula:
-  $$Q_{base} = Q_{entered} \times M$$
-  $$\text{Unit Rate}_{base} = \frac{\text{Unit Rate}_{entered}}{M}$$
-- Storage: All `StockBalance` and `StockMovement` records **strictly** store $Q_{base}$ (Paise / Scaled Units).
+#### 1. Deterministic Alternate Unit Semantics
+- Do **NOT** use unrestricted floating-point multipliers.
+- Every conversion rule defines an exact rational ratio:
+  ```typescript
+  conversionNumerator: number;   // e.g. 24 (Number of base units)
+  conversionDenominator: number; // e.g. 1 (Number of secondary units)
+  ```
+- **Authoritative Base Quantity Arithmetic**:
+  $$Q_{\text{base (scaled 1000)}} = \text{round}\left( \frac{Q_{\text{entered (scaled 1000)}} \times \text{conversionNumerator}}{\text{conversionDenominator}} \right)$$
+- **Price Conversion Arithmetic**:
+  $$\text{Unit Rate}_{\text{entered (Paise)}} = \text{round}\left( \frac{\text{Unit Rate}_{\text{base (Paise)}} \times \text{conversionNumerator}}{\text{conversionDenominator}} \right)$$
+- **Base Unit Truth**: All database stock balances (`StockBalance`) and inventory movements (`StockMovement`) strictly store integer $Q_{\text{base}}$ at Scale 1,000.
 
-#### 2. Firestore Schema (`organizations/{orgId}/unitConversions/{id}`)
+#### 2. Return + Payment Interaction & Explicit Party Credit Balance
+- When an invoice is paid (e.g. ₹10,000) and subsequently returned (e.g. ₹3,000):
+  - Document Outstanding (`balanceDuePaise`) remains ₹0 (never negative).
+  - The Credit Note generates a Credit entry on the Customer's Party Ledger of ₹3,000.
+  - The Customer's authoritative balance decreases by ₹3,000 (or increases unallocated advance/credit).
+  - Document balance due is **never** stored as negative. All credits flow to the Party Account.
+- Similarly, a Purchase Return against a paid vendor bill generates a Debit entry on the Supplier Ledger, creating an explicit supplier debit note/advance balance.
+
+#### 3. Payment + Cash Discount Semantics
+- Settlement equation:
+  $$\text{settlementAmountPaise} = \text{paymentAmountPaise} + \text{discountPaise}$$
+  $$\sum \text{allocatedAmountPaise} \le \text{settlementAmountPaise}$$
+- Cash discount is a settlement adjustment, **not** additional cash received/paid.
+- The discount allowed cannot exceed the eligible outstanding balance of the target invoice.
+
+#### 4. Sales Return Accounting & Historical COGS Reversal
+- The economic flow is:
+  $$\text{Sales Return} \rightarrow \text{Revenue reversal} \rightarrow \text{Tax reversal} \rightarrow \text{Receivable reversal} \rightarrow \text{Inventory restoration at historical sale cost} \rightarrow \text{Historical COGS reversal}$$
+- Reversal uses the original sale line's recorded `costPriceMicroPaise`.
+- Full-line return: Reversal exactly matches the original recorded line economics.
+- Partial return: Reversal proportionally allocates taxable amount, CGST, SGST, IGST, and COGS without fractional drift.
+
+#### 5. Deterministic Tax Reversal
+- For full-line returns: $\text{Returned Tax} \equiv \text{Original Recorded Line Tax}$.
+- For partial returns: $\text{Returned Tax} = \text{round}\left( \frac{Q_{\text{return}}}{Q_{\text{orig}}} \times \text{Original Recorded Tax} \right)$, ensuring no tax discrepancy over multiple partial returns.
+
+#### 6. Quotation Conversion Snapshot Invariant
+- Quotation conversion uses the **immutable commercial snapshot** stored on the quotation (product, quoted rate, line discount, tax configuration). It never silently replaces quoted prices with current catalog prices.
+- At conversion time, the transaction revalidates stock, fiscal period status, customer status, and the conversion lock (`convertedToInvoiceId`) to guarantee atomic, single-execution conversion.
+
+#### 7. FIFO Determinism
+- Auto-allocation orders unpaid invoices deterministically:
+  $$\text{ORDER BY } \text{transactionDate ASC}, \text{documentNumber ASC}, \text{transactionId ASC}$$
+- Excludes cancelled, draft, or fully settled documents.
+
+#### 8. Expense / General Ledger Boundary
+- Phase 2 records GL-compatible metadata (category, vendor, taxable amount, tax breakdown, ITC eligibility, payment mode, reference) without implementing Phase 3 General Ledger charts prematurely.
+
+---
+
+### 4.2 Module E: Alternate Units & Multi-Unit Conversion Engine Schema
+
 ```typescript
 export interface UnitConversionRule {
-  id: string;                    // `${productId}_${secondaryUnit}` or `${fromUnit}_${toUnit}`
+  id: string;                    // `${orgId}_${productId || 'GLOBAL'}_${fromUnit}`
   orgId: string;
-  productId?: string;            // If product-specific; undefined if global
-  fromUnit: string;              // e.g. "BOX"
-  toBaseUnit: string;            // e.g. "PCS"
-  multiplier: number;            // e.g. 24 (1 BOX = 24 PCS)
-  barcode?: string;              // Specific barcode for the Box packaging
-  salePricePaise?: number;       // Custom Box price (optional, defaults to unitPrice * multiplier)
-  purchaseCostPaise?: number;    // Custom Box purchase cost
+  productId?: string;            // Product-specific rule if defined; undefined for global rule
+  fromUnit: string;              // Secondary unit symbol (e.g. "BOX", "STRIP", "CARTON")
+  toBaseUnit: string;            // Canonical base unit symbol (e.g. "PCS", "TAB", "KG")
+  conversionNumerator: number;   // e.g. 24 (Base units per secondary unit)
+  conversionDenominator: number; // e.g. 1
+  barcode?: string;              // Specific barcode for the secondary packaging
+  salePricePaise?: number;       // Custom packaged selling price in Paise (optional)
+  purchaseCostPaise?: number;    // Custom packaged purchase cost in Paise (optional)
+  createdAt: string;
+  updatedAt: string;
 }
 ```
+
 
 ---
 

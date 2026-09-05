@@ -8,6 +8,7 @@ import inventoryRouter from './modules/inventory/inventory.controller'
 import paymentsRouter from './modules/payments/payments.controller'
 import salesRouter from './modules/sales/sales.controller'
 import purchasesRouter from './modules/purchases/purchases.controller'
+import unitsRouter from './modules/units/units.controller'
 import { idempotencyMiddleware } from './middleware/idempotency.middleware'
 import { errorHandler, notFound } from './middleware/error.middleware'
 
@@ -36,6 +37,7 @@ app.use('/api/inventory', inventoryRouter)
 app.use('/api/payments', paymentsRouter)
 app.use('/api/sales', salesRouter)
 app.use('/api/purchases', purchasesRouter)
+app.use('/api/units', unitsRouter)
 
 // 404 + Error handler (must be last)
 app.use(notFound)

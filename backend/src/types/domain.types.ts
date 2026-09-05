@@ -175,6 +175,10 @@ export interface Product {
   stockQty: number;              // Cached display aggregate (scaled base units)
   reorderLevel: number;          // Threshold (scaled base units)
   lowStockWarning: boolean;
+  secondaryUnitSymbol?: string;
+  conversionNumerator?: number;  // Base units per secondary unit (e.g. 24)
+  conversionDenominator?: number;// e.g. 1
+  secondaryBarcode?: string;     // Specific barcode for secondary packaging
   brand?: string;
   rackLocation?: string;
   description?: string;
@@ -227,10 +231,16 @@ export interface UnitConversion {
   id: string;
   orgId: string;
   productId?: string;
-  fromUnit: string;              // "BOX"
-  toBaseUnit: string;            // "PCS"
-  multiplier: number;            // e.g. 24 (1 BOX = 24 PCS)
-  precision: number;
+  fromUnit: string;              // Secondary unit (e.g. "BOX")
+  toBaseUnit: string;            // Canonical base unit (e.g. "PCS")
+  conversionNumerator: number;   // e.g. 24
+  conversionDenominator: number; // e.g. 1
+  multiplier?: number;           // Derived helper
+  barcode?: string;              // Specific barcode for secondary packaging
+  salePricePaise?: number;       // Packaged selling price in Paise
+  purchaseCostPaise?: number;    // Packaged purchase rate in Paise
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Category {
