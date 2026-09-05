@@ -116,22 +116,17 @@ const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    header: 'ACCOUNTING SOLUTIONS',
+    header: 'ACCOUNTING & BANKING',
     items: [
-      { label: 'Cash & Bank', href: '/ledger/party', icon: Landmark },
-      { label: 'E-Invoicing', href: '/sales/invoices', icon: FileCheck },
-      { label: 'Automated Bills', href: '/sales/invoices', icon: Zap },
+      { label: 'Cash & Bank Ledger', href: '/ledger/party', icon: Landmark },
       { label: 'Expenses', href: '/purchases/invoices', icon: Receipt },
-      { label: 'POS Billing', href: '/sales/invoices/new', icon: Monitor },
     ],
   },
   {
-    header: 'BUSINESS TOOLS',
+    header: 'ADMINISTRATION',
     items: [
-      { label: 'Staff Attendance & Payroll', href: '/admin/users', icon: UserCheck },
       { label: 'Manage Users', href: '/admin/users', icon: Users, roles: ['ADMIN', 'SUPER_ADMIN'] },
-      { label: 'Online Orders', href: '/sales/invoices', icon: ShoppingBag },
-      { label: 'SMS Marketing', href: '/reports/sales', icon: MessageSquare },
+      { label: 'Organization & Branches', href: '/admin/organization', icon: Settings, roles: ['ADMIN', 'SUPER_ADMIN'] },
     ],
   },
 ]

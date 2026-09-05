@@ -12,14 +12,7 @@ import {
   LogOut,
   User,
   Settings,
-  Home,
-  ChevronRight,
-  Monitor,
-  Megaphone,
-  Gift,
-  Headphones,
-  Smartphone,
-  Calculator,
+  HelpCircle,
 } from 'lucide-react'
 
 function useBreadcrumbs() {
@@ -104,59 +97,20 @@ function TopNav({
       </div>
 
       {/* Right Top Action & Utility Icons */}
-      <div className="ml-auto flex items-center gap-1 sm:gap-1.5">
-        {/* Desktop / POS View */}
-        <button
-          title="POS / Desktop Mode"
-          className="hidden sm:flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+      <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+        {/* Help & Documentation */}
+        <Link
+          to="/reports/sales"
+          title="Reports & Analytics"
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors"
         >
-          <Monitor className="h-4 w-4" />
-        </button>
-
-        {/* Announcements */}
-        <button
-          title="Updates & Announcements"
-          className="hidden sm:flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors"
-        >
-          <Megaphone className="h-4 w-4" />
-        </button>
-
-        {/* Rewards / Offers */}
-        <button
-          title="Rewards & Referrals"
-          className="hidden sm:flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors"
-        >
-          <Gift className="h-4 w-4" />
-        </button>
-
-        {/* Help & Support */}
-        <button
-          title="Customer Support"
-          className="hidden sm:flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors"
-        >
-          <Headphones className="h-4 w-4" />
-        </button>
-
-        {/* Mobile App */}
-        <button
-          title="Get Mobile App"
-          className="hidden md:flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors"
-        >
-          <Smartphone className="h-4 w-4" />
-        </button>
-
-        {/* Calculator */}
-        <button
-          title="Calculator & Tools"
-          className="hidden md:flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors"
-        >
-          <Calculator className="h-4 w-4" />
-        </button>
+          <HelpCircle className="h-4 w-4" />
+        </Link>
 
         {/* Notifications */}
         <button
           title="Notifications"
-          className="relative flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+          className="relative flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors"
         >
           <Bell className="h-4 w-4" />
           <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-[#0070F2]" />
@@ -169,10 +123,13 @@ function TopNav({
             className="flex items-center gap-2 rounded-lg p-1 sm:px-2 sm:py-1 hover:bg-slate-100 transition-colors"
             aria-label="User profile"
           >
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-400 text-slate-950 text-xs font-bold shrink-0">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#0070F2] text-white text-xs font-bold shrink-0 shadow-xs">
               {user ? getInitials(user.firstName, user.lastName) : 'U'}
             </div>
-            <ChevronDown className="h-3.5 w-3.5 text-slate-500 hidden sm:block" />
+            <span className="hidden sm:block text-xs font-semibold text-slate-700 max-w-[100px] truncate">
+              {user?.firstName || 'User'}
+            </span>
+            <ChevronDown className="h-3.5 w-3.5 text-slate-400 hidden sm:block" />
           </button>
 
           {profileOpen && (
@@ -209,7 +166,7 @@ function TopNav({
                 <div className="border-t border-slate-100 py-1">
                   <button
                     onClick={handleLogout}
-                    className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer font-medium"
+                    className="flex w-full items-center gap-3 px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer font-medium"
                   >
                     <LogOut className="h-4 w-4" />
                     Sign Out

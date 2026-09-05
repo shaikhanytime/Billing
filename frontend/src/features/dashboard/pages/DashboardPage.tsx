@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { collection, getDocs, query, where, orderBy, limit, Timestamp } from 'firebase/firestore'
+import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore'
 import { db } from '@/firebase/config'
 import { useAuth } from '@/hooks/useAuth'
 import { formatCurrency, formatDate, cn } from '@/lib/utils'
@@ -12,15 +12,15 @@ import {
   FileText,
   Plus,
   TrendingUp,
-  X,
-  PhoneCall,
-  Smartphone,
+  UserPlus,
+  PackagePlus,
+  Receipt,
   ChevronDown,
   Clock,
   Sparkles,
   Calendar,
 } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import {
   ResponsiveContainer,
   BarChart,
@@ -45,7 +45,7 @@ function useDashboardData() {
   const [refreshKey, setRefreshKey] = useState(0)
 
   const queryResult = useQuery({
-    queryKey: ['mybillbook-dashboard', orgId, refreshKey],
+    queryKey: ['billinganytime-dashboard', orgId, refreshKey],
     enabled: !!orgId,
     queryFn: async () => {
       const base = `organizations/${orgId}`
@@ -148,9 +148,7 @@ function useDashboardData() {
 }
 
 export function DashboardPage() {
-  const navigate = useNavigate()
   const { data, isLoading, isFetching, refresh } = useDashboardData()
-  const [banner1Dismissed, setBanner1Dismissed] = useState(false)
   const [salesPeriod, setSalesPeriod] = useState<'Daily' | 'Weekly' | 'Monthly'>('Daily')
 
   const toCollect = data?.toCollect ?? 0
@@ -171,72 +169,39 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-4 sm:space-y-5 pb-8 max-w-7xl mx-auto">
-      {/* ─── Top Promotional & Quick Feature Banners (SAP Horizon Morning Gradients) ─── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-        {/* Banner 1: Cashflo AI Collection */}
-        {!banner1Dismissed && (
-          <div className="relative overflow-hidden rounded-xl border border-emerald-200 bg-gradient-to-r from-emerald-50/90 via-teal-50/50 to-white p-4 sm:p-5 flex items-center justify-between shadow-xs">
-            <button
-              onClick={() => setBanner1Dismissed(true)}
-              className="absolute top-2.5 right-2.5 p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-emerald-100/60 transition-colors"
-              aria-label="Dismiss banner"
-            >
-              <X className="h-4 w-4" />
-            </button>
-            <div className="space-y-1 pr-4 z-10 max-w-[70%]">
-              <p className="text-sm sm:text-base font-bold text-slate-900 leading-tight">
-                ₹10 Lakh+ stuck?
-              </p>
-              <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">
-                myCashflo AI calls all of your parties, daily for automated payment collection.
-              </p>
-              <button
-                onClick={() => navigate('/parties/customers')}
-                className="inline-flex items-center gap-1 text-xs font-bold text-[#15803D] hover:text-emerald-800 hover:underline pt-1 cursor-pointer"
-              >
-                <span>Book demo</span>
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </button>
-            </div>
-            {/* 3D Graphic */}
-            <div className="relative shrink-0 flex items-center justify-center">
-              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 p-0.5 shadow-sm rotate-3">
-                <div className="h-full w-full bg-white rounded-[14px] flex flex-col items-center justify-center text-emerald-600">
-                  <PhoneCall className="h-7 w-7 text-emerald-600 animate-bounce" />
-                  <span className="text-[9px] font-mono mt-0.5 font-bold text-emerald-700">AI CALLS</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Banner 2: Staff Management */}
-        <div className="relative overflow-hidden rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50/90 via-indigo-50/50 to-white p-4 sm:p-5 flex items-center justify-between shadow-xs">
-          <div className="space-y-1 pr-4 z-10 max-w-[70%]">
-            <p className="text-sm sm:text-base font-bold text-slate-900 leading-tight">
-              Manage Staff Smarter
-            </p>
-            <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">
-              Track Staff's attendance, live location, orders and field activity seamlessly.
-            </p>
-            <button
-              onClick={() => navigate('/admin/users')}
-              className="inline-flex items-center gap-1 text-xs font-bold text-[#0070F2] hover:text-blue-800 hover:underline pt-1 cursor-pointer"
-            >
-              <span>Manage Staff Now</span>
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
-          {/* Mobile App mockup graphic */}
-          <div className="relative shrink-0 flex items-center justify-center">
-            <div className="h-16 w-14 sm:h-20 sm:w-16 rounded-xl bg-gradient-to-tr from-[#0070F2] to-indigo-500 p-0.5 shadow-sm -rotate-2">
-              <div className="h-full w-full bg-white rounded-[10px] flex flex-col items-center justify-center text-[#0070F2] p-1">
-                <Smartphone className="h-6 w-6 text-[#0070F2]" />
-                <div className="w-6 h-1 bg-blue-400/40 rounded-full mt-1.5" />
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* ─── Quick Actions Enterprise Bar ─── */}
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl border border-slate-200 bg-white shadow-xs">
+        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider hidden md:inline-block mr-1">
+          Quick Actions:
+        </span>
+        <Link
+          to="/sales/invoices/new"
+          className="flex items-center gap-1.5 rounded-lg bg-[#0070F2] hover:bg-[#0058C9] px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition-colors"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          <span>Create Sale Invoice</span>
+        </Link>
+        <Link
+          to="/payments/received"
+          className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 px-3.5 py-2 text-xs font-semibold text-slate-700 transition-colors"
+        >
+          <Receipt className="h-3.5 w-3.5 text-slate-500" />
+          <span>Record Payment</span>
+        </Link>
+        <Link
+          to="/parties/customers/new"
+          className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 px-3.5 py-2 text-xs font-semibold text-slate-700 transition-colors"
+        >
+          <UserPlus className="h-3.5 w-3.5 text-slate-500" />
+          <span>Add Customer</span>
+        </Link>
+        <Link
+          to="/inventory/products/new"
+          className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 px-3.5 py-2 text-xs font-semibold text-slate-700 transition-colors"
+        >
+          <PackagePlus className="h-3.5 w-3.5 text-slate-500" />
+          <span>Add Product</span>
+        </Link>
       </div>
 
       {/* ─── Business Overview Header & Metric Cards ─── */}
@@ -411,30 +376,54 @@ export function DashboardPage() {
           )}
         </div>
 
-        {/* Right 1/3: Today's Checklist */}
+        {/* Right 1/3: Business Summary & Shortcuts */}
         <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 flex flex-col justify-between shadow-xs">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-bold text-slate-900">Today's Checklist</h3>
-            <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-              Beta
-            </span>
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-slate-900">Entity Summary</h3>
+              <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                Active
+              </span>
+            </div>
+
+            <div className="space-y-2.5 pt-1">
+              <Link
+                to="/parties/customers"
+                className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 hover:border-slate-200 bg-slate-50/70 hover:bg-slate-50 transition-colors group"
+              >
+                <span className="text-xs font-semibold text-slate-700">Customers & Debtors</span>
+                <span className="text-xs font-bold text-[#0070F2] group-hover:underline">View All →</span>
+              </Link>
+
+              <Link
+                to="/parties/suppliers"
+                className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 hover:border-slate-200 bg-slate-50/70 hover:bg-slate-50 transition-colors group"
+              >
+                <span className="text-xs font-semibold text-slate-700">Suppliers & Creditors</span>
+                <span className="text-xs font-bold text-[#0070F2] group-hover:underline">View All →</span>
+              </Link>
+
+              <Link
+                to="/inventory/products"
+                className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 hover:border-slate-200 bg-slate-50/70 hover:bg-slate-50 transition-colors group"
+              >
+                <span className="text-xs font-semibold text-slate-700">Inventory & Stock</span>
+                <span className="text-xs font-bold text-[#0070F2] group-hover:underline">Check Stock →</span>
+              </Link>
+
+              <Link
+                to="/reports/gst"
+                className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 hover:border-slate-200 bg-slate-50/70 hover:bg-slate-50 transition-colors group"
+              >
+                <span className="text-xs font-semibold text-slate-700">GST & Tax Compliance</span>
+                <span className="text-xs font-bold text-[#0070F2] group-hover:underline">Reports →</span>
+              </Link>
+            </div>
           </div>
 
-          <div className="flex flex-col items-center justify-center py-8 text-center space-y-3">
-            <div className="h-16 w-16 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
-              <Clock className="h-8 w-8" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-slate-800">Coming Soon...</p>
-              <p className="text-xs text-slate-500 mt-1 max-w-[200px] leading-relaxed">
-                Smarter daily checklist for overdue invoices and party follow-ups.
-              </p>
-            </div>
-          </div>
-
-          <div className="border-t border-slate-100 pt-3 flex items-center justify-between text-xs text-slate-500">
-            <span>Pending follow-ups</span>
-            <span className="font-bold text-slate-800 font-mono">0</span>
+          <div className="border-t border-slate-100 pt-3 mt-4 flex items-center justify-between text-xs text-slate-500">
+            <span>GST Active Scheme</span>
+            <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-[11px] border border-emerald-200">Regular</span>
           </div>
         </div>
       </div>
