@@ -20,6 +20,10 @@ export interface Product {
   stockQty: number
   reorderLevel: number
   lowStockWarning: boolean
+  secondaryUnitSymbol?: string
+  conversionNumerator?: number
+  conversionDenominator?: number
+  secondaryBarcode?: string
   brand?: string
   rackLocation?: string
   description?: string

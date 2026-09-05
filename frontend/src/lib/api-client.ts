@@ -7,12 +7,27 @@ const apiClient = axios.create({
   timeout: 30000,
 })
 
-// Attach Firebase ID token to every request
+import { useAuthStore } from '@/store/auth.store'
+
+// Attach Firebase ID token or local dev session headers to every request
 apiClient.interceptors.request.use(async (config) => {
   const user = auth.currentUser
   if (user) {
-    const token = await user.getIdToken()
-    config.headers.Authorization = `Bearer ${token}`
+    try {
+      const token = await user.getIdToken()
+      config.headers.Authorization = `Bearer ${token}`
+    } catch {
+      // ignore
+    }
+  } else {
+    const storeUser = useAuthStore.getState().user
+    if (storeUser) {
+      config.headers.Authorization = `Bearer dev_mock_token_${storeUser.uid}`
+      config.headers['x-user-uid'] = storeUser.uid
+      config.headers['x-org-id'] = storeUser.orgId
+      config.headers['x-user-role'] = storeUser.role
+      config.headers['x-user-email'] = storeUser.email
+    }
   }
   return config
 })

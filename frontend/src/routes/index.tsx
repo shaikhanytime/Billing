@@ -38,6 +38,12 @@ const SalesInvoicesPage = lazy(() =>
 const CreateSaleInvoicePage = lazy(() =>
   import('@/features/sales/pages/CreateSaleInvoicePage').then((m) => ({ default: m.CreateSaleInvoicePage }))
 )
+const QuotationsPage = lazy(() =>
+  import('@/features/sales/pages/QuotationsPage').then((m) => ({ default: m.QuotationsPage }))
+)
+const CreateQuotationPage = lazy(() =>
+  import('@/features/sales/pages/CreateQuotationPage').then((m) => ({ default: m.CreateQuotationPage }))
+)
 
 // Purchases
 const PurchaseInvoicesPage = lazy(() =>
@@ -112,7 +118,14 @@ const router = createBrowserRouter([
             path: 'sales/invoices/new',
             element: <Suspense fallback={PageLoader}><CreateSaleInvoicePage /></Suspense>,
           },
-          { path: 'sales/quotations', element: <ComingSoon name="Quotations" /> },
+          {
+            path: 'sales/quotations',
+            element: <Suspense fallback={PageLoader}><QuotationsPage /></Suspense>,
+          },
+          {
+            path: 'sales/quotations/new',
+            element: <Suspense fallback={PageLoader}><CreateQuotationPage /></Suspense>,
+          },
           { path: 'sales/returns', element: <ComingSoon name="Sales Returns" /> },
 
           // ─── Purchases ────────────────────────────────────────────────────

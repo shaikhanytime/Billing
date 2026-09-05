@@ -355,6 +355,84 @@ export interface SaleInvoice extends TransactionEnvelope {
   eInvoiceQrCode?: string;
 }
 
+export type QuotationStatus = 'DRAFT' | 'SENT' | 'ACCEPTED' | 'CONVERTED' | 'EXPIRED' | 'DECLINED';
+
+export interface QuotationLineItem {
+  id: string;
+  productId: string;
+  productName: string;
+  sku?: string;
+  barcode?: string;
+  hsnCode: string;
+  enteredQuantity: number;       // Scaled units (e.g. 2000 = 2.000)
+  enteredUnit: string;           // e.g. "BOX" or "PCS"
+  conversionNumerator: number;   // e.g. 24
+  conversionDenominator: number; // e.g. 1
+  baseQuantity: number;          // Canonical base quantity in scaled units (e.g. 48000 = 48.000 PCS)
+  unitPricePaise: number;        // Quoted price per entered unit in Paise
+  isTaxInclusive: boolean;
+  discountPercent: number;       // e.g. 5 for 5%
+  discountPaise: number;
+  taxRate: 0 | 5 | 12 | 18 | 28;
+  taxablePaise: number;
+  cgstPaise: number;
+  sgstPaise: number;
+  igstPaise: number;
+  totalTaxPaise: number;
+  totalPaise: number;
+}
+
+export interface Quotation {
+  id: string;
+  organizationId: string;
+  financialPeriodId: string;
+  documentType: 'QUOTATION';
+  documentNumber: string;        // Sequence allocated "EST-XXXXX"
+  quotationStatus: QuotationStatus;
+  quotationDate: string;         // ISO YYYY-MM-DD
+  validUntil: string;            // ISO YYYY-MM-DD
+  partyId?: string;
+  partyName: string;
+  partyPhone?: string;
+  partyGstin?: string;
+  partyStateCode?: string;
+  billingAddress?: {
+    street: string;
+    city: string;
+    state: string;
+    pincode: string;
+    stateCode: string;
+  };
+  shippingAddress?: {
+    street: string;
+    city: string;
+    state: string;
+    pincode: string;
+    stateCode?: string;
+  };
+  placeOfSupply: string;
+  warehouseId: string;
+  locationId?: string;
+  items: QuotationLineItem[];
+  subtotalPaise: number;
+  taxableAmountPaise: number;
+  cgstAmountPaise: number;
+  sgstAmountPaise: number;
+  igstAmountPaise: number;
+  totalTaxPaise: number;
+  discountPaise: number;
+  additionalChargesPaise: number;
+  roundOffPaise: number;
+  totalAmountPaise: number;
+  notes?: string;
+  termsAndConditions?: string;
+  convertedToInvoiceId?: string;
+  convertedAt?: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface PurchaseLineItem {
   id: string;
   productId: string;

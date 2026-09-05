@@ -64,6 +64,268 @@ export interface CreateSaleInvoiceInput {
 
 export class SalesService {
   /**
+   * Authoritative transaction helper for executing Sales Invoice financial and inventory posting.
+   * Reused identically across Direct Sales, POS Billing, and Quotation Conversion.
+   */
+  static async postSalesInvoiceInTransaction(
+    txn: FirebaseFirestore.Transaction,
+    orgId: string,
+    periodId: string,
+    invoiceRef: FirebaseFirestore.DocumentReference,
+    invoiceData: SaleInvoice,
+    allowNegativeStock: boolean,
+    actor: { uid: string; email?: string },
+    payment?: CreateSaleInvoiceInput['payment']
+  ): Promise<SaleInvoice> {
+    const now = new Date().toISOString()
+    const invoiceId = invoiceRef.id
+    const invoiceNumber = invoiceData.documentNumber
+    const locationId = invoiceData.locationId
+    const warehouseId = invoiceData.warehouseId
+    const affectsInventory = invoiceData.documentType !== 'QUOTATION'
+
+    // Fetch and validate all products & stock balances
+    const productDocs: { [id: string]: Product } = {}
+    const stockBalanceDocs: { [id: string]: StockBalance } = {}
+
+    for (const item of invoiceData.items) {
+      if (!productDocs[item.productId]) {
+        const pRef = db.collection(`organizations/${orgId}/products`).doc(item.productId)
+        const pSnap = await txn.get(pRef)
+        if (!pSnap.exists) throw new Error(`Product ${item.productId} not found.`)
+        const prod = pSnap.data() as Product
+        if (prod.status === 'INACTIVE') {
+          throw new Error(`Product "${prod.name}" is inactive and cannot be invoiced.`)
+        }
+        productDocs[item.productId] = prod
+
+        const sbId = `${orgId}_${locationId}_${warehouseId}_${item.productId}`
+        const sbRef = db.collection(`organizations/${orgId}/stockBalances`).doc(sbId)
+        const sbSnap = await txn.get(sbRef)
+        if (sbSnap.exists) {
+          stockBalanceDocs[item.productId] = sbSnap.data() as StockBalance
+        } else {
+          stockBalanceDocs[item.productId] = {
+            id: sbId,
+            orgId,
+            locationId,
+            warehouseId,
+            productId: item.productId,
+            quantity: 0,
+            averageCost: 0,
+            updatedAt: now,
+          }
+        }
+      }
+    }
+
+    // Check stock availability
+    if (affectsInventory && !allowNegativeStock) {
+      for (const item of invoiceData.items) {
+        const product = productDocs[item.productId]!
+        if (product.trackInventory) {
+          const currentStock = stockBalanceDocs[item.productId]!.quantity
+          if (currentStock < item.quantity) {
+            const avail = (currentStock / 1000).toFixed(3)
+            const req = (item.quantity / 1000).toFixed(3)
+            throw new Error(
+              `Insufficient stock for "${product.name}". Available: ${avail} ${product.baseUnitSymbol}, Required: ${req} ${product.baseUnitSymbol}.`
+            )
+          }
+        }
+      }
+    }
+
+    // 1. Write Sales Invoice Document
+    txn.set(invoiceRef, invoiceData)
+
+    // 2. Deduct Inventory & Record Stock Movement Ledger
+    if (affectsInventory) {
+      for (const item of invoiceData.items) {
+        const product = productDocs[item.productId]!
+        if (product.trackInventory) {
+          const currentSb = stockBalanceDocs[item.productId]!
+          const newQty = currentSb.quantity - item.quantity
+          const sbRef = db.collection(`organizations/${orgId}/stockBalances`).doc(currentSb.id)
+
+          txn.set(
+            sbRef,
+            {
+              ...currentSb,
+              quantity: newQty,
+              updatedAt: now,
+            },
+            { merge: true }
+          )
+
+          // Update Product aggregate cached stock
+          const prodRef = db.collection(`organizations/${orgId}/products`).doc(item.productId)
+          txn.update(prodRef, {
+            stockQty: (product.stockQty || 0) - item.quantity,
+            updatedAt: now,
+          })
+
+          // Stock Movement Ledger Entry
+          const smRef = db.collection(`organizations/${orgId}/stockMovements`).doc()
+          const smData: StockMovement = {
+            id: smRef.id,
+            orgId,
+            locationId,
+            warehouseId,
+            productId: item.productId,
+            movementType: 'OUTWARD_SALE',
+            referenceType: invoiceData.documentType,
+            referenceId: invoiceId,
+            referenceNumber: invoiceNumber,
+            baseQuantity: -item.quantity,
+            unitCost: item.costPriceMicroPaise || currentSb.averageCost || 0,
+            totalValuation: Math.round(((item.costPriceMicroPaise || currentSb.averageCost || 0) * (item.quantity / 1000)) / 10000),
+            balanceSnapshot: newQty,
+            occurredAt: invoiceData.transactionDate,
+            createdBy: actor.uid,
+          }
+          txn.set(smRef, smData)
+        }
+      }
+    }
+
+    // 3. Post Customer Receivable to Party Ledger & Update Party Balance
+    if (invoiceData.partyId && affectsInventory) {
+      const partyRef = db.collection(`organizations/${orgId}/parties`).doc(invoiceData.partyId)
+      const partySnap = await txn.get(partyRef)
+
+      if (partySnap.exists) {
+        const partyData = partySnap.data() || {}
+        const currentBal = partyData.currentBalance || 0
+        const updatedBalAfterInvoice = currentBal + invoiceData.totalAmountPaise
+
+        // Debit entry for full invoice amount (receivable created)
+        const plRef = db.collection(`organizations/${orgId}/partyLedger`).doc()
+        const plData: PartyLedgerEntry = {
+          id: plRef.id,
+          orgId,
+          partyId: invoiceData.partyId,
+          transactionId: invoiceId,
+          documentType: invoiceData.documentType,
+          documentNumber: invoiceNumber,
+          date: invoiceData.transactionDate,
+          debit: invoiceData.totalAmountPaise,
+          credit: 0,
+          balanceSnapshot: updatedBalAfterInvoice,
+          description: `Sales Invoice #${invoiceNumber}`,
+          createdBy: actor.uid,
+          createdAt: now,
+        }
+        txn.set(plRef, plData)
+
+        let finalPartyBal = updatedBalAfterInvoice
+
+        // If upfront payment provided, create Payment Voucher & Credit entry
+        if (invoiceData.paidAmountPaise > 0 && payment) {
+          const payNumber = await SequenceService.allocateInTransaction(
+            txn,
+            orgId,
+            periodId,
+            'PAYMENT_IN',
+            'PAY-'
+          )
+          const payRef = db.collection(`organizations/${orgId}/payments`).doc()
+          finalPartyBal = updatedBalAfterInvoice - invoiceData.paidAmountPaise
+
+          const payVoucher: PaymentVoucher = {
+            transactionId: payRef.id,
+            organizationId: orgId,
+            financialPeriodId: periodId,
+            documentType: 'PAYMENT_IN',
+            documentNumber: payNumber,
+            transactionDate: invoiceData.transactionDate,
+            postingDate: now,
+            status: 'POSTED',
+            locationId,
+            warehouseId,
+            partyId: invoiceData.partyId,
+            partyName: invoiceData.partyName,
+            partyType: 'CUSTOMER',
+            totalAmount: invoiceData.paidAmountPaise,
+            discountAmount: 0,
+            paymentMode: payment.paymentMode,
+            bankAccountId: payment.bankAccountId,
+            referenceNumber: payment.referenceNumber,
+            unallocatedAmount: 0,
+            allocations: [
+              {
+                invoiceId,
+                invoiceNumber,
+                allocatedAmount: invoiceData.paidAmountPaise,
+              },
+            ],
+            createdBy: actor.uid,
+            createdAt: now,
+            updatedAt: now,
+          }
+          txn.set(payRef, payVoucher)
+
+          // Allocation record
+          const allocRef = db.collection(`organizations/${orgId}/paymentAllocations`).doc()
+          const allocData: PaymentAllocation = {
+            id: allocRef.id,
+            orgId,
+            paymentId: payRef.id,
+            invoiceId,
+            invoiceType: 'SALE_INVOICE',
+            allocatedAmount: invoiceData.paidAmountPaise,
+            allocatedAt: now,
+          }
+          txn.set(allocRef, allocData)
+
+          // Ledger credit entry
+          const plPayRef = db.collection(`organizations/${orgId}/partyLedger`).doc()
+          const plPayData: PartyLedgerEntry = {
+            id: plPayRef.id,
+            orgId,
+            partyId: invoiceData.partyId,
+            transactionId: payRef.id,
+            documentType: 'PAYMENT_IN',
+            documentNumber: payNumber,
+            date: invoiceData.transactionDate,
+            debit: 0,
+            credit: invoiceData.paidAmountPaise,
+            balanceSnapshot: finalPartyBal,
+            description: `Payment for Invoice #${invoiceNumber}`,
+            createdBy: actor.uid,
+            createdAt: now,
+          }
+          txn.set(plPayRef, plPayData)
+        }
+
+        txn.update(partyRef, {
+          currentBalance: finalPartyBal,
+          updatedAt: now,
+        })
+      }
+    }
+
+    // 4. Authoritative Audit Log inside Transaction
+    AuditService.logInTransaction(txn, orgId, {
+      actorUid: actor.uid,
+      actorEmail: actor.email,
+      action: 'POST',
+      entityType: invoiceData.documentType,
+      entityId: invoiceId,
+      entityNumber: invoiceNumber,
+      diff: {
+        after: {
+          totalAmountPaise: invoiceData.totalAmountPaise,
+          itemsCount: invoiceData.items.length,
+          paymentStatus: invoiceData.paymentStatus,
+        },
+      },
+    })
+
+    return invoiceData
+  }
+
+  /**
    * Atomically creates and posts a Sales Invoice or POS Sale.
    */
   static async createInvoice(
@@ -99,53 +361,14 @@ export class SalesService {
         prefix
       )
 
-      // Fetch all products involved to check stock, trackInventory flag, and WAC
+      // Fetch products for line item calculation
       const productDocs: { [id: string]: Product } = {}
-      const stockBalanceDocs: { [id: string]: StockBalance } = {}
-
       for (const item of input.items) {
         if (!productDocs[item.productId]) {
           const pRef = db.collection(`organizations/${orgId}/products`).doc(item.productId)
           const pSnap = await txn.get(pRef)
           if (!pSnap.exists) throw new Error(`Product ${item.productId} not found.`)
           productDocs[item.productId] = pSnap.data() as Product
-
-          // Stock balance
-          const sbId = `${orgId}_${locationId}_${warehouseId}_${item.productId}`
-          const sbRef = db.collection(`organizations/${orgId}/stockBalances`).doc(sbId)
-          const sbSnap = await txn.get(sbRef)
-          if (sbSnap.exists) {
-            stockBalanceDocs[item.productId] = sbSnap.data() as StockBalance
-          } else {
-            stockBalanceDocs[item.productId] = {
-              id: sbId,
-              orgId,
-              locationId,
-              warehouseId,
-              productId: item.productId,
-              quantity: 0,
-              averageCost: 0,
-              updatedAt: now,
-            }
-          }
-        }
-      }
-
-      // Check stock availability if quotation is NOT used
-      const affectsInventory = docType !== 'QUOTATION'
-      if (affectsInventory && !allowNegativeStock) {
-        for (const item of input.items) {
-          const product = productDocs[item.productId]
-          if (product.trackInventory) {
-            const currentStock = stockBalanceDocs[item.productId].quantity
-            if (currentStock < item.quantity) {
-              const avail = (currentStock / 1000).toFixed(3)
-              const req = (item.quantity / 1000).toFixed(3)
-              throw new Error(
-                `Insufficient stock for "${product.name}". Available: ${avail} ${product.baseUnitSymbol}, Required: ${req} ${product.baseUnitSymbol}.`
-              )
-            }
-          }
         }
       }
 
@@ -166,7 +389,7 @@ export class SalesService {
       const processedItems: SaleLineItem[] = []
 
       for (const item of input.items) {
-        const product = productDocs[item.productId]
+        const product = productDocs[item.productId]!
         const lineGrossPaise = Math.round((item.quantity * item.unitPricePaise) / 1000)
 
         // Line discount
@@ -188,8 +411,6 @@ export class SalesService {
         totalSgstPaise += lineTaxCalc.sgstPaise
         totalIgstPaise += lineTaxCalc.igstPaise
 
-        const currentWac = stockBalanceDocs[item.productId]?.averageCost || 0
-
         processedItems.push({
           id: `item_${processedItems.length + 1}`,
           productId: item.productId,
@@ -210,7 +431,6 @@ export class SalesService {
           igstPaise: lineTaxCalc.igstPaise,
           totalTaxPaise: lineTaxCalc.totalTaxPaise,
           totalPaise: lineTaxCalc.totalPaise,
-          costPriceMicroPaise: currentWac,
         })
       }
 
@@ -279,193 +499,17 @@ export class SalesService {
         updatedAt: now,
       }
 
-      // Write Invoice Doc
-      txn.set(invoiceRef, invoiceData)
-
-      // Update Inventory if applicable
-      if (affectsInventory) {
-        for (const item of processedItems) {
-          const product = productDocs[item.productId]
-          if (product.trackInventory) {
-            const currentSb = stockBalanceDocs[item.productId]
-            const newQty = currentSb.quantity - item.quantity
-            const sbRef = db.collection(`organizations/${orgId}/stockBalances`).doc(currentSb.id)
-
-            txn.set(
-              sbRef,
-              {
-                ...currentSb,
-                quantity: newQty,
-                updatedAt: now,
-              },
-              { merge: true }
-            )
-
-            // Update Product aggregate cached stock
-            const prodRef = db.collection(`organizations/${orgId}/products`).doc(item.productId)
-            txn.update(prodRef, {
-              stockQty: (product.stockQty || 0) - item.quantity,
-              updatedAt: now,
-            })
-
-            // Stock Movement Ledger Entry
-            const smRef = db.collection(`organizations/${orgId}/stockMovements`).doc()
-            const smData: StockMovement = {
-              id: smRef.id,
-              orgId,
-              locationId,
-              warehouseId,
-              productId: item.productId,
-              movementType: 'OUTWARD_SALE',
-              referenceType: docType,
-              referenceId: invoiceId,
-              referenceNumber: invoiceNumber,
-              baseQuantity: -item.quantity,
-              unitCost: item.costPriceMicroPaise || 0,
-              totalValuation: Math.round(((item.costPriceMicroPaise || 0) * (item.quantity / 1000)) / 10000),
-              balanceSnapshot: newQty,
-              occurredAt: invoiceDate,
-              createdBy: actor.uid,
-            }
-            txn.set(smRef, smData)
-          }
-        }
-      }
-
-      // Party Ledger & Balance Update if partyId exists & not a quotation
-      if (input.partyId && docType !== 'QUOTATION') {
-        const partyRef = db.collection(`organizations/${orgId}/parties`).doc(input.partyId)
-        const partySnap = await txn.get(partyRef)
-
-        if (partySnap.exists) {
-          const partyData = partySnap.data() || {}
-          const currentBal = partyData.currentBalance || 0
-          const updatedBalAfterInvoice = currentBal + roundedTotalPaise
-
-          // 1. Debit entry for full invoice amount (receivable created)
-          const plRef = db.collection(`organizations/${orgId}/partyLedger`).doc()
-          const plData: PartyLedgerEntry = {
-            id: plRef.id,
-            orgId,
-            partyId: input.partyId,
-            transactionId: invoiceId,
-            documentType: docType,
-            documentNumber: invoiceNumber,
-            date: invoiceDate,
-            debit: roundedTotalPaise,
-            credit: 0,
-            balanceSnapshot: updatedBalAfterInvoice,
-            description: `Sales Invoice #${invoiceNumber}`,
-            createdBy: actor.uid,
-            createdAt: now,
-          }
-          txn.set(plRef, plData)
-
-          let finalPartyBal = updatedBalAfterInvoice
-
-          // 2. If upfront payment provided, create Payment Voucher & Credit entry
-          if (initialPaidPaise > 0 && input.payment) {
-            const payNumber = await SequenceService.allocateInTransaction(
-              txn,
-              orgId,
-              periodId,
-              'PAYMENT_IN',
-              'PAY-'
-            )
-            const payRef = db.collection(`organizations/${orgId}/payments`).doc()
-            finalPartyBal = updatedBalAfterInvoice - initialPaidPaise
-
-            const payVoucher: PaymentVoucher = {
-              transactionId: payRef.id,
-              organizationId: orgId,
-              financialPeriodId: periodId,
-              documentType: 'PAYMENT_IN',
-              documentNumber: payNumber,
-              transactionDate: invoiceDate,
-              postingDate: now,
-              status: 'POSTED',
-              locationId,
-              warehouseId,
-              partyId: input.partyId,
-              partyName: input.partyName,
-              partyType: 'CUSTOMER',
-              totalAmount: initialPaidPaise,
-              discountAmount: 0,
-              paymentMode: input.payment.paymentMode,
-              bankAccountId: input.payment.bankAccountId,
-              referenceNumber: input.payment.referenceNumber,
-              unallocatedAmount: 0,
-              allocations: [
-                {
-                  invoiceId,
-                  invoiceNumber,
-                  allocatedAmount: initialPaidPaise,
-                },
-              ],
-              createdBy: actor.uid,
-              createdAt: now,
-              updatedAt: now,
-            }
-            txn.set(payRef, payVoucher)
-
-            // Allocation record
-            const allocRef = db.collection(`organizations/${orgId}/paymentAllocations`).doc()
-            const allocData: PaymentAllocation = {
-              id: allocRef.id,
-              orgId,
-              paymentId: payRef.id,
-              invoiceId,
-              invoiceType: 'SALE_INVOICE',
-              allocatedAmount: initialPaidPaise,
-              allocatedAt: now,
-            }
-            txn.set(allocRef, allocData)
-
-            // Ledger credit entry
-            const plPayRef = db.collection(`organizations/${orgId}/partyLedger`).doc()
-            const plPayData: PartyLedgerEntry = {
-              id: plPayRef.id,
-              orgId,
-              partyId: input.partyId,
-              transactionId: payRef.id,
-              documentType: 'PAYMENT_IN',
-              documentNumber: payNumber,
-              date: invoiceDate,
-              debit: 0,
-              credit: initialPaidPaise,
-              balanceSnapshot: finalPartyBal,
-              description: `Payment for Invoice #${invoiceNumber}`,
-              createdBy: actor.uid,
-              createdAt: now,
-            }
-            txn.set(plPayRef, plPayData)
-          }
-
-          txn.update(partyRef, {
-            currentBalance: finalPartyBal,
-            updatedAt: now,
-          })
-        }
-      }
-
-      // Authoritative Audit Log inside Transaction
-      AuditService.logInTransaction(txn, orgId, {
-        actorUid: actor.uid,
-        actorEmail: actor.email,
-        action: 'POST',
-        entityType: docType,
-        entityId: invoiceId,
-        entityNumber: invoiceNumber,
-        diff: {
-          after: {
-            totalAmountPaise: roundedTotalPaise,
-            itemsCount: processedItems.length,
-            paymentStatus,
-          },
-        },
-      })
-
-      return invoiceData
+      // Execute authoritative posting
+      return await SalesService.postSalesInvoiceInTransaction(
+        txn,
+        orgId,
+        periodId,
+        invoiceRef,
+        invoiceData,
+        allowNegativeStock,
+        actor,
+        input.payment
+      )
     })
   }
 
